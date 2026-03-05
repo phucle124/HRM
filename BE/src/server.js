@@ -22,8 +22,9 @@ const testDb = async ()=>{
 
 testDb();
 
-app.listen(port,host, () =>{
+app.listen(port, () =>{
     console.log(`Server is now running on port ${port}`);
 });
+
 
 
