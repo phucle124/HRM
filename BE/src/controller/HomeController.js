@@ -6,7 +6,7 @@ const HomePage = async (req,res)=>{
 
     // res.render('home',{listUsers: await getAllUsers()});
 
-    res.json({message: "List users", data: await getAllUsers()});
+    res.json({await getAllUsers()});
 }
 
 module.exports = {

@@ -3,6 +3,8 @@ const router = express.Router();
 
 const { HomePage } = require('../controller/HomeController');
 
-router.get('/users', HomePage);
+//Danh sách API (cần gửi về FE)
+
+router.get('/', HomePage);
 
 module.exports = router;

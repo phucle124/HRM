@@ -1,3 +1,5 @@
+//Chỉ dùng cho EJS (phía BE). Nếu không => thì ko dùng file này
+
 const express = require('express');
 const router = express.Router();
 
