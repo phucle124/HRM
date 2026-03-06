@@ -9,7 +9,7 @@ const apiRoute = require('./routes/api');
 
 const db = require('./config/db');
 
-const {getAllUsers} = require('./services/CRUDService')
+
 
 //config app
 const app = express();
