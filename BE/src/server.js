@@ -15,14 +15,11 @@ const port = process.env.PORT;
 const host = process.env.HOST_NAME;
 
 
-const testDb = async ()=>{
-    const KQ = await getAllUsers();
-    console.log(KQ);
-}
+//use app
+app.use(express.json());
+app.use('/', webRoute);
 
-testDb();
-
-app.listen(port,host, () =>{
+app.listen(port, () =>{
     console.log(`Server is now running on port ${port}`);
 });
 
