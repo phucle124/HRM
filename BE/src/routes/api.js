@@ -5,6 +5,6 @@ const { AllUsersData, UserByIdData } = require('../controller/HomeController');
 
 //Danh sách API (cần gửi về FE)
 router.get('/users', AllUsersData); //Get all users
-router.get('/user/:id', UserByIdData); //Get user by ID
+router.get('/users/:id', UserByIdData); //Get user by ID
 
 module.exports = router;
