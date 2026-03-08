@@ -1,14 +1,25 @@
 const connection = require('../config/db');
 
-const {getAllUsers} = require('../services/CRUDService')
+const {getAllUsers ,getUserById} = require('../services/CRUDService')
+
+const AllUsersData = async (req,res)=>{
+
+    res.json(await getAllUsers());
+}
+
+const UserByIdData = async (req,res) =>{
+    let userId = req.body.id;
+    res.json(await getUserById(userId));
+}
 
 const HomePage = async (req,res)=>{
 
-    // res.render('home',{listUsers: await getAllUsers()});
+    res.render('home',{listUsers: await getAllUsers()});
 
-    res.json({message: "List users", data: await getAllUsers()});
 }
 
 module.exports = {
-    HomePage
+    AllUsersData,
+    UserByIdData,
+    HomePage,
 }

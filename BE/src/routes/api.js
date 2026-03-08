@@ -1,10 +1,10 @@
 const express = require('express');
 const router = express.Router();
 
-const { HomePage } = require('../controller/HomeController');
+const { AllUsersData, UserByIdData } = require('../controller/HomeController');
 
 //Danh sách API (cần gửi về FE)
-
-router.get('/', HomePage);
+router.get('/users', AllUsersData); //Get all users
+router.get('/user/:id', UserByIdData); //Get user by ID
 
 module.exports = router;
