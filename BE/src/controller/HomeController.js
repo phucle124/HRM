@@ -8,7 +8,7 @@ const AllUsersData = async (req,res)=>{
 }
 
 const UserByIdData = async (req,res) =>{
-    let userId = req.body.id;
+    let userId = req.params.id;
     res.json(await getUserById(userId));
 }
 
