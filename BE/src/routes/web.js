@@ -3,8 +3,16 @@
 const express = require('express');
 const router = express.Router();
 
-const { HomePage } = require('../controller/HomeController');
+const { HomePage, LoginPage , LoginHandle} = require('../controller/HomeController');
+const { CreateUser } = require('../services/CRUDService');
+
 
 router.get('/', HomePage);
+
+router.get('/login', LoginPage);
+
+router.post('/login', LoginHandle);
+
+router.post('/create-user', CreateUser)
 
 module.exports = router;

@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tạo tài khoản</title>
+</head>
+<body>
+    <form action="/create-user" method="POST">
+        <fieldset>
+            <legend>Form User</legend>
+            <div class="input-group">
+                <label>Nhập địa chỉ email:</label>
+                <input type="email" name="email"/>
+            </div>
+            <div class="input-group">
+                <label>Nhập mật khẩu:</label>
+                <input type="password" name="password"/>
+            </div>
+            <div class="input-group">
+                <label>Nhập số điện thoại:</label>
+                <input type="tel" name="phone">
+            </div>
+            <div><button class="btn btn-primary" type="submit">Tạo tài khoản</button></div>
+        </fieldset>
+    </form>
+</body>
+</html>

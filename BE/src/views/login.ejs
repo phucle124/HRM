@@ -3,18 +3,21 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+    <title>Đăng nhập</title>
 </head>
 <body>
     <div class="topnav">
-        <a class="active" href="/">Trang chủ</a>
-        <a href="/login">Đăng nhập</a>
+        <a href="/">Trang chủ</a>
+        <a class="active" href="/login">Đăng nhập</a>
+        <a class="logout" href="/logout">Đăng xuất</a>
     </div>
 
-    <p>Xin chào,</p>
-    <br>
-    <p>Chào mừng bạn đến với hệ thống Quản lí nhân sự</p>
-    
+    <h1>Trang đăng nhập</h1>
+    <form action="/login" method="POST">
+        <input type="email" name="email" placeholder="email">
+        <input type="password" name="password" placeholder="password">
+        <button>Đăng nhập</button>
+    </form>
 </body>
 </html>
 
@@ -44,4 +47,9 @@
         padding: 10px 20px;
         
     }
+
+    .logout{
+        background: red;
+    }
+
 </style>

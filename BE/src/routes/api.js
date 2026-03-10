@@ -7,4 +7,6 @@ const { AllUsersData, UserByIdData } = require('../controller/HomeController');
 router.get('/users', AllUsersData); //Get all users
 router.get('/users/:id', UserByIdData); //Get user by ID
 
+
+
 module.exports = router;

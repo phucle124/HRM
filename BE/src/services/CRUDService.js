@@ -14,7 +14,32 @@ const getUserById = async (userId) =>{
     return results;
 }
 
+const CreateUser = async (req,res)=>{
+
+    const email = req.body.email;
+    const password = req.body.password;
+    const phone = req.body.phone;
+
+    if(email=='' || password==''||phone==''){
+        res.send('Vui lòng nhập đầy đủ thông tin');
+    }
+
+    const [results,fields] = await connection.query(`
+        INSERT INTO users
+        VALUES email=?, password =?, phone =?
+    `,[email,password,phone]);
+
+    if(results.length > 0){
+        res.send('Thêm tài khoản thành công');
+        console.log('Tài khoản được thêm: ' ,results);
+    }
+
+}
+
+
+
 module.exports = {
     getAllUsers,
     getUserById,
+    CreateUser,
 }

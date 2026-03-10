@@ -1,5 +1,7 @@
 require('dotenv').config();
 
+const cors = require('cors');
+
 const express = require('express');
 
 //Dùng EJS để test hiển thị trên giao diện(Phía BE)
@@ -9,18 +11,29 @@ const apiRoute = require('./routes/api');
 
 const db = require('./config/db');
 
+const config_ViewEngine = require('./config/viewEngine')
 
 
 //config app
 const app = express();
-
 const port = process.env.PORT;
-const host = process.env.HOST_NAME;
+
+
+
+
+//Config req.body
+app.use(express.urlencoded({extended:true}));
+app.use(express.json());
+
+//Config view engine
+config_ViewEngine(app); //Cố định view engine để test với EJS
 
 
 //use app
+app.use(cors());
 app.use(express.json());
-//app.use('/', webRoute);
+
+// app.use('/', webRoute);
 app.use('/', apiRoute);
 
 app.listen(port, () =>{
