@@ -6,9 +6,21 @@
     <title>Tạo tài khoản</title>
 </head>
 <body>
-    <form action="/create-user" method="POST">
+    <div class="topnav">
+        <li><a href="/createUser">Tạo tài khoản</a></li>
+        <li>Xóa tài khoản</li>
+        <li>Đổi vai trò</li>
+        <li>Quản lí phòng ban</li>
+        <li>Quản lí nhân viên</li>
+    </div>
+    <div class="form-add-new">
+        <form action="/create-user" method="POST">
         <fieldset>
             <legend>Form User</legend>
+            <div class="input-group">
+                <label>Nhập tên:</label>
+                <input type="text" name="name">
+            </div>
             <div class="input-group">
                 <label>Nhập địa chỉ email:</label>
                 <input type="email" name="email"/>
@@ -21,8 +33,17 @@
                 <label>Nhập số điện thoại:</label>
                 <input type="tel" name="phone">
             </div>
+            <div class="input-group">
+                <label>Chọn vai trò:</label>
+                <select name="role">
+                    <option selected value="">- vai trò -</option>
+                    <option value="hr">hr</option>
+                    <option value="employee">employee</option>
+                </select>
+            </div>
             <div><button class="btn btn-primary" type="submit">Tạo tài khoản</button></div>
         </fieldset>
     </form>
+    </div>
 </body>
 </html>

@@ -1,6 +1,6 @@
 const connection = require('../config/db');
 
-const {getAllUsers ,getUserById} = require('../services/CRUDService')
+const {getAllUsers ,getUserById, CreateUser, UpdateUser, DeleteUser} = require('../services/CRUDService')
 
 //APIs
 const AllUsersData = async (req,res)=>{
@@ -40,7 +40,7 @@ const LoginHandle = async (req,res) =>{
     //Dùng để test trên EJS
     if(results.length > 0){
         if(results[0].role == 'admin')
-            res.render('./admin/index');
+            res.render('./admin/index',{users: await getAllUsers()});
         else if(results[0].role == 'hr')
             res.render('./hr/index');
         else if(results[0].role == 'employee')
@@ -51,9 +51,66 @@ const LoginHandle = async (req,res) =>{
     else res.render('NotFound');
 }
 
+const createUser = async(req,res)=>{
+
+    const name = req.body.name;
+    const email = req.body.email;
+    const password = req.body.password;
+    const phone = req.body.phone;
+    const role = req.body.role;
 
 
+    if(name==''||email=='' || password==''||phone==''|| role==''){
+        res.send('Vui lòng nhập đầy đủ thông tin');
+    }
 
+    let data = await CreateUser(name,email,password,phone,role);
+
+    if(data.affectedRows > 0){
+        console.log('Tài khoản được thêm: ' , data.results);
+        res.redirect('/');
+    }
+    res.send('Khong the tao tai khoan'); 
+}
+
+const editUser = async(req,res)=>{
+    const id = req.body.id;
+    
+    const name = req.body.name;
+    const email = req.body.email;
+    const password = req.body.password;
+    const phone = req.body.phone;
+    const role = req.body.role;
+
+    let data = await UpdateUser(id,name,email,password,phone, role);
+
+    if(data.affectedRows > 0){
+        res.redirect('/');
+    }
+
+    res.send('Cập nhật thất bại');
+}
+
+const deleteUser = async(req,res)=>{
+    const id = req.params.id;
+
+    DeleteUser(id);
+  
+    console.log('Đã xóa thành công 1 user');
+    res.redirect('/');
+}
+
+const createPage = (req,res)=>{
+    res.render('./admin/createUser');
+}
+
+const editPage = async (req,res)=>{
+    let uid = req.params.id;
+
+    let data = await getUserById(uid)
+
+    res.render('./admin/editUser',{userEdit: data[0]});
+}
 
 module.exports = {
     AllUsersData,
@@ -62,4 +119,11 @@ module.exports = {
     LoginPage,
     LoginHandle,
 
+    createPage,
+    createUser,
+
+    editPage,
+    editUser,
+
+    deleteUser,
 }

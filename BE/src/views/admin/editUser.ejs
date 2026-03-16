@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edit user</title>
+</head>
+<body>
+    <div class="form-add-new">
+        <form action="/edit-user" method="POST">
+        <fieldset>
+            <legend>Form edit user</legend>
+            <div class="input-group">
+                <label>id:</label>
+                <input type="text" name="id" value="<%=userEdit.id%>">
+            </div>
+            <div class="input-group">
+                <label>Nhập tên:</label>
+                <input type="text" name="name" value="<%=userEdit.name%>">
+            </div>
+            <div class="input-group">
+                <label>Nhập địa chỉ email:</label>
+                <input type="email" name="email" value="<%=userEdit.email%>"/>
+            </div>
+            <div class="input-group">
+                <label>Nhập mật khẩu:</label>
+                <input type="password" name="password" value="<%=userEdit.password%>"/>
+            </div>
+            <div class="input-group">
+                <label>Nhập số điện thoại:</label>
+                <input type="tel" name="phone" value="<%=userEdit.phone%>">
+            </div>
+             <div class="input-group">
+                <label>Vai trò đã chọn:</label>
+                <select name="role">
+                    <option value="hr" <%= userEdit.role == 'hr' ? 'selected' : '' %> >hr</option>
+                    <option value="employee" <%= userEdit.role == 'employee' ? 'selected' : '' %>>employee</option>
+                </select>
+            </div>
+            <div><button class="btn btn-primary" type="submit">Cập nhật</button></div>
+        </fieldset>
+    </form>
+    </div>
+</body>
+</html>

@@ -1,45 +1,54 @@
 const connection = require('../config/db');
 
 const getAllUsers = async ()=>{
-    let [results,fields] = await connection.query('SELECT id, name FROM users');
+    let [results,fields] = await connection.query('SELECT id, name, email, password, phone,role FROM users');
     return results;
 }
 
 const getUserById = async (userId) =>{
     let [results, fields] = await connection.query(`
-        SELECT id, name 
+        SELECT id, name, email, password, phone 
         FROM users
         WHERE id = ?
     `,[userId]);
     return results;
 }
 
-const CreateUser = async (req,res)=>{
-
-    const email = req.body.email;
-    const password = req.body.password;
-    const phone = req.body.phone;
-
-    if(email=='' || password==''||phone==''){
-        res.send('Vui lòng nhập đầy đủ thông tin');
-    }
+const CreateUser = async (name,email,password,phone,role)=>{
 
     const [results,fields] = await connection.query(`
-        INSERT INTO users
-        VALUES email=?, password =?, phone =?
-    `,[email,password,phone]);
+        INSERT INTO users(name,email,password,phone,role)
+        VALUES (?,?,?,?,?)
+    `,[name,email,password,phone,role]);
 
-    if(results.length > 0){
-        res.send('Thêm tài khoản thành công');
-        console.log('Tài khoản được thêm: ' ,results);
-    }
+    return results;
 
 }
 
+const UpdateUser = async (id,name,email,password,phone,role)=>{
+    const [results,fields] = await connection.query(`
+        UPDATE users
+        SET name=?,email=?,password=?,phone=?,role=?
+        WHERE id = ?
+    `,[name,email,password,phone,role,id]);
+
+    return results;
+}
+
+const DeleteUser = async (userid) =>{
+    const[results,fields] = await connection.query(`
+        DELETE FROM users    
+        WHERE id = ?
+    `,[userid]);
+
+    return results;
+}
 
 
 module.exports = {
     getAllUsers,
     getUserById,
     CreateUser,
+    UpdateUser,
+    DeleteUser,
 }

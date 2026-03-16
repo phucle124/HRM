@@ -7,11 +7,43 @@
 </head>
 <body>
     <aside>
-        <li><a href="./createUser.ejs">Tạo tài khoản</a></li>
+        <li><a href="/create">Tạo tài khoản</a></li>
         <li>Xóa tài khoản</li>
         <li>Đổi vai trò</li>
         <li>Quản lí phòng ban</li>
         <li>Quản lí nhân viên</li>
     </aside>
+
+    <div>
+        <table border="2px" cellspacing="10">
+            <thead>
+                <th>id</th>
+                <th>name</th>
+                <th>email</th>
+                <th>password</th>
+                <th>phone</th>
+                <th>role</th>
+                <th>Action</th>
+            </thead>
+            <tbody>
+                <% users.forEach(user => { %>
+                    <tr>
+                        <td><%= user.id %></td>
+                        <td><%= user.name %></td>
+                        <td><%= user.email %></td>
+                        <td><%= user.password %></td>
+                        <td><%= user.phone %></td>
+                        <td><%= user.role %></td>
+                        <td>
+                            <a href="/edit/<%=user.id%>">Edit</a>
+                            <span>|</span>
+                            <a href="/delete/<%=user.id%>">Delete</a>
+                        </td>
+                    </tr>
+                <% }) %>
+            </tbody>
+        </table>
+    </div>
+
 </body>
 </html>
