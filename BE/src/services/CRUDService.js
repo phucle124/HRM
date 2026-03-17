@@ -1,5 +1,7 @@
 const connection = require('../config/db');
 
+//Tầng DAO
+
 const getAllUsers = async ()=>{
     let [results,fields] = await connection.query('SELECT id, name, email, password, phone,role FROM users');
     return results;
@@ -43,6 +45,7 @@ const DeleteUser = async (userid) =>{
 
     return results;
 }
+
 
 
 module.exports = {

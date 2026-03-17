@@ -1,4 +1,4 @@
-const connection = require('../config/db');
+const {login} = require('../services/AuthenticateService');
 
 const {getAllUsers ,getUserById, CreateUser, UpdateUser, DeleteUser} = require('../services/CRUDService')
 
@@ -26,29 +26,30 @@ const LoginPage = (req,res)=>{
 }
 
 const LoginHandle = async (req,res) =>{
-    const { email, password } = req.body;
     
-    const [results,fields] = await connection.query(`
-        SELECT id, name, role FROM users WHERE email = ? AND password = ?    
-    `,[email, password]);
+    const { email, password } = req.body;
 
-    //Dùng cho API
-    // if(results.length > 0){
-    //     return res.json({user : results[0]});
-    // }
+    const dataUser = await login(email,password);
 
-    //Dùng để test trên EJS
-    if(results.length > 0){
-        if(results[0].role == 'admin')
-            res.render('./admin/index',{users: await getAllUsers()});
-        else if(results[0].role == 'hr')
-            res.render('./hr/index');
-        else if(results[0].role == 'employee')
-            res.render('./employee/index');
-        else 
-            res.render('NotFound');
-    }
-    else res.render('NotFound');
+    return res.status(200).json({
+        data: dataUser
+    });
+
+    
+
+    // Dùng để test trên EJS
+
+//     if(dataUser.role == 'admin')
+//         res.render('./admin/index',{users: await getAllUsers()});
+//     else if(dataUser.role == 'hr')
+//         res.render('./hr/index', {user: dataUser});
+//     else if(dataUser.role == 'employee')
+//         res.render('./employee/index', {user: dataUser});
+//     else 
+//         res.render('NotFound');
+// }
+
+  
 }
 
 const createUser = async(req,res)=>{
