@@ -11,14 +11,12 @@ const apiRoute = require('./routes/api');
 
 const db = require('./config/db');
 
-const config_ViewEngine = require('./config/viewEngine')
+const config_ViewEngine = require('./config/viewEngine');
 
 
-//config app
+//config app BackEnd
 const app = express();
 const port = process.env.PORT;
-
-
 
 
 //Config req.body
@@ -29,12 +27,12 @@ app.use(express.json());
 config_ViewEngine(app); //Cố định view engine để test với EJS
 
 
-//use app
-app.use(cors());
-app.use(express.json());
+//MiddleWares
+app.use(cors()); //dùng cho React thì mới làm việc với BE(NodeJS) đc
 
-// app.use('/', webRoute);
-app.use('/', apiRoute);
+
+ app.use('/', webRoute);
+//app.use('/', apiRoute);
 
 app.listen(port, () =>{
     console.log(`Server is now running on port ${port}`);

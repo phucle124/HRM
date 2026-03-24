@@ -9,7 +9,7 @@
     <div class="topnav">
         <a href="/">Trang chủ</a>
         <a class="active" href="/login">Đăng nhập</a>
-        <a class="logout" href="/logout">Đăng xuất</a>
+
     </div>
 
     <h1>Trang đăng nhập</h1>
@@ -18,6 +18,11 @@
         <input type="password" name="password" placeholder="password">
         <button>Đăng nhập</button>
     </form>
+    <% if(typeof error !== 'undefined' && error){ %>
+        <div class="alert text-danger">
+            <%= error %>
+        </div>
+    <% } %>
 </body>
 </html>
 
@@ -48,8 +53,6 @@
         
     }
 
-    .logout{
-        background: red;
-    }
+    
 
 </style>

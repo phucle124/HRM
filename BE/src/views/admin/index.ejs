@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+    <title>List users</title>
 </head>
 <body>
     <aside>
@@ -12,6 +12,7 @@
         <li>Đổi vai trò</li>
         <li>Quản lí phòng ban</li>
         <li>Quản lí nhân viên</li>
+        <li><a class="logout" href="/logout">Đăng xuất</a></li>
     </aside>
 
     <div>
@@ -35,9 +36,16 @@
                         <td><%= user.phone %></td>
                         <td><%= user.role %></td>
                         <td>
-                            <a href="/edit/<%=user.id%>">Edit</a>
+                            <a href="/edit/<%=user.id%>">Sửa</a>
                             <span>|</span>
-                            <a href="/delete/<%=user.id%>">Delete</a>
+                            <a href="/delete/<%=user.id%>">Xóa</a>
+                            <span>|</span>
+                            <form action="/lock/<%=user.id%>" method="POST">
+                                <select name="isLock" onchange="this.form.submit()">
+                                    <option value="0" <%= user.is_lock == 0 ? 'selected' : '' %> >Mở</option>
+                                    <option value="1" <%= user.is_lock == 1 ? 'selected' : '' %> >Khóa(lock)</option>
+                                </select>
+                            </form>
                         </td>
                     </tr>
                 <% }) %>
@@ -47,3 +55,11 @@
 
 </body>
 </html>
+
+<style>
+    .logout{
+        background: rgb(255, 97, 97);
+        font-weight: bold;
+        color: rgb(205, 205, 68);
+    }
+</style>

@@ -15,6 +15,11 @@
     <br>
     <p>Chào mừng bạn đến với hệ thống Quản lí nhân sự</p>
     
+    <% if(loggedOut == true){ %>
+        <script>
+            localStorage.clear();
+        </script>
+    <% } %>
 </body>
 </html>
 
