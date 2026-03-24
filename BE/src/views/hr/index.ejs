@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HR Dashboard - Employee Management</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        table { width: 100%; border-collapse: collapse; }
+        th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+        th { background-color: #f2f2f2; }
+        .action-links a { margin-right: 10px; text-decoration: none; }
+        .add-btn { display: inline-block; margin-bottom: 20px; padding: 10px 15px; background-color: #4CAF50; color: white; border: none; cursor: pointer; text-decoration: none; }
+        .search-bar { margin-bottom: 20px; }
+        .search-bar input { padding: 8px; min-width: 300px;}
+        .search-bar button { padding: 8px 12px; }
+    </style>
+</head>
+<body>
+    <h1>Quản lý Nhân viên</h1>
+
+    <div class="search-bar">
+        <form action="/hr" method="GET">
+            <input type="text" name="search" placeholder="Tìm theo tên, phòng ban, mã NV..." value="<%= searchQuery %>">
+            <button type="submit">Tìm kiếm</button>
+        </form>
+    </div>
+
+    <a href="/hr/add" class="add-btn">Thêm Nhân viên mới</a>
+
+    <table>
+        <thead>
+            <tr>
+                <th>Mã NV</th>
+                <th>Tên</th>
+                <th>Email</th>
+                <th>Phòng ban</th>
+                <th>Thao tác</th>
+            </tr>
+        </thead>
+        <tbody>
+            <% if(employees && employees.length > 0) { %>
+                <% employees.forEach(employee => { %>
+                    <tr>
+                        <td><%= employee.id %></td>
+                        <td><%= employee.name %></td>
+                        <td><%= employee.email %></td>
+                        <td><%= employee.department_name || 'Chưa có' %></td>
+                        <td class="action-links">
+                            <a href="/hr/edit/<%= employee.id %>">Sửa</a>
+                            <a href="/hr/delete/<%= employee.id %>" onclick="return confirm('Bạn có chắc chắn muốn xóa nhân viên này?');">Xóa</a>
+                        </td>
+                    </tr>
+                <% }) %>
+            <% } else { %>
+                <tr>
+                    <td colspan="5">Không có nhân viên nào để hiển thị.</td>
+                </tr>
+            <% } %>
+        </tbody>
+    </table>
+
+</body>
+</html>
