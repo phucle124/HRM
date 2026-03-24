@@ -7,9 +7,13 @@ const connection = mysql.createPool({
     user: process.env.DB_USER,
     password: process.env.DB_PASSWORD,
     database: process.env.DB_NAME,
+    ssl: {
+        rejectUnauthorized: true
+    },
     waitForConnections: true,
-    connectionLimit: 10,
-    maxIdle: 10, 
+    connectionLimit: 5,
+    maxIdle: 2, 
+    idleTimeout: 60000,
     enableKeepAlive: true
 });
 
