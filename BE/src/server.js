@@ -31,8 +31,8 @@ config_ViewEngine(app); //Cố định view engine để test với EJS
 app.use(cors()); //dùng cho React thì mới làm việc với BE(NodeJS) đc
 
 
- app.use('/', webRoute);
-//app.use('/', apiRoute);
+//app.use('/', webRoute);
+app.use('/', apiRoute);
 
 app.listen(port, () =>{
     console.log(`Server is now running on port ${port}`);
