@@ -241,10 +241,11 @@ const getAllDepartments = async(req,res)=>{
 }
 
 const getDepartmentById = async(req,res)=>{
-    let dataDept = await DepartmentByIdData();
+    const departmentId = req.params.id;
+    let dataDept = await DepartmentByIdData(departmentId);
 
     //API
-    return res.status(200).json({data:dataDept});
+    return res.status(200).json({data: dataDept});
 }
 
 const createDepartmentPage = (req,res)=>{
