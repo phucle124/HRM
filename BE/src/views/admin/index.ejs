@@ -6,15 +6,13 @@
     <title>List users</title>
 </head>
 <body>
-    <aside>
-        <li><a href="/create">Tạo tài khoản</a></li>
-        <li>Xóa tài khoản</li>
-        <li>Đổi vai trò</li>
-        <li>Quản lí phòng ban</li>
-        <li>Quản lí nhân viên</li>
-        <li><a class="logout" href="/logout">Đăng xuất</a></li>
+    <aside class="topnav">
+        <li><a href="/create-userPage">Tạo tài khoản</a></li>
+        <li><a href="/create-departmentPage">Tạo phòng ban</a></li>
+        <li><a href="/logout">Đăng xuất</a></li>
     </aside>
 
+    <h2>Danh sách tài khoản</h2>
     <div>
         <table border="2px" cellspacing="10">
             <thead>
@@ -36,9 +34,9 @@
                         <td><%= user.phone %></td>
                         <td><%= user.role %></td>
                         <td>
-                            <a href="/edit/<%=user.id%>">Sửa</a>
+                            <a href="/edit-user/<%=user.id%>">Sửa</a>
                             <span>|</span>
-                            <a href="/delete/<%=user.id%>">Xóa</a>
+                            <a href="/delete-user/<%=user.id%>">Xóa</a>
                             <span>|</span>
                             <form action="/lock/<%=user.id%>" method="POST">
                                 <select name="isLock" onchange="this.form.submit()">
@@ -46,6 +44,38 @@
                                     <option value="1" <%= user.is_lock == 1 ? 'selected' : '' %> >Khóa(lock)</option>
                                 </select>
                             </form>
+                        </td>
+                    </tr>
+                <% }) %>
+            </tbody>
+        </table>
+    </div>
+
+    <h2>Danh sách phòng ban</h2>
+    <div>
+        <table border="2px" cellspacing="10">
+            <thead>
+                <th>id</th>
+                <th>name</th>
+                <th>manager's id</th>
+                <th>Action</th>
+            </thead>
+            <tbody>
+                <% departments.forEach(department => { %>
+                    <tr>
+                        <td><%= department.department_id %></td>
+                        <td><%= department.name %></td>
+                        <td><%= department.manager_id %></td>
+                        <td>
+                            <a href="/edit-department/<%=department.department_id%>">Sửa</a>
+                            <span>|</span>
+                            <a href="/delete-department/<%=department.department_id%>">Xóa</a>
+                            <span>|</span>
+                            <!-- <form action="/lock/<%=department.id%>" method="POST">
+                                <select name="isLock" onchange="this.form.submit()">
+                                    
+                                </select>
+                            </form> -->
                         </td>
                     </tr>
                 <% }) %>
