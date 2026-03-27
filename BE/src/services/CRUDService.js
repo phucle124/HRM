@@ -1,9 +1,8 @@
 const connection = require('../config/db');
-
 //Tầng DAO
 
 const AllUsersData = async ()=>{
-    const [results,fields] = await connection.query('SELECT id, name, role, email, password, phone, is_lock FROM users');
+    const [results,fields] = await connection.query('SELECT id, name, email, password, phone, role, is_lock FROM users');
     return results;
 }
 
@@ -13,6 +12,7 @@ const UserByIdData = async (userId) =>{
         FROM users
         WHERE id = ?
     `,[userId]);
+
     return results;
 }
 
@@ -56,26 +56,25 @@ const LockUser = async (userId, isLock) =>{
 
 const AllDepartmentsData = async()=>{
     const [results,fields] = await connection.query(`
-        SELECT department_id , name, manager_id FROM departments
+        SELECT department_id, name, manager_id FROM departments
     `);
     return results;
 }
 
 const DepartmentByIdData = async(departmentId)=>{
     const [results, fields] = await connection.query(`
-        SELECT department_id as id, name, manager_id FROM departments
+        SELECT department_id, name, manager_id FROM departments
         WHERE department_id = ?
     `,[departmentId]);
 
     return results;
 }
 
-const CreateDepartment = async(departmentName,ManagerId)=>{
-
+const CreateDepartment = async(department_Name)=>{
     const [results,fields] = await connection.query(`
-        INSERT INTO departments(name,manager_id)
-        VALUES(?,?)
-    `,[departmentName,ManagerId]);
+        INSERT INTO departments(name, manager_id)
+        VALUES(?,NULL)
+    `,[department_Name]);
 
     return results;
 }
@@ -83,7 +82,7 @@ const CreateDepartment = async(departmentName,ManagerId)=>{
 const DeleteDepartment = async(departmentId)=>{
     const [results,fields] = await connection.query(`
         DELETE FROM departments d
-        WHERE d.department_id = 1
+        WHERE d.department_id = ?
             AND NOT EXISTS (
                 SELECT e.employee_id
                 FROM employees e
@@ -96,13 +95,14 @@ const DeleteDepartment = async(departmentId)=>{
     return results;
 }
 
-const EditDepartment = async(departmentName,ManagerId)=>{
+const EditDepartment = async(departmentId,departmentName,ManagerId)=>{
 
     const [results,fields] = await connection.query(`
         UPDATE departments
-        SET name = ?, manager_id = ?
-        WHERE manager_id = ?
-    `,[departmentName, ManagerId]);
+            SET name = ?, manager_id = ?
+            WHERE department_id = ?
+            AND (NOT (name <=> ?) OR NOT (manager_id <=> ?))
+    `,[departmentName, ManagerId, departmentId, departmentName, ManagerId]);
 
     return results;
 }
@@ -124,6 +124,50 @@ const EmployeeByIdData = async(employeeId)=>{
     return results;
 }
 
+const Assign_Manager = async(departmentId,employeeId)=>{
+    const [results,fields] = await connection.query(`
+        UPDATE departments
+        SET manager_id = ?
+        WHERE department_id = ?
+    `,[employeeId,departmentId]);
+
+    return results;
+}
+
+const AllManagersData = async()=>{
+    const [results,fields] = await connection.query(`
+        SELECT * 
+        FROM employees e
+        JOIN departments d 
+        ON e.employee_id = d.manager_id
+    `)
+
+    return results;
+}
+
+const Manager_ByDepartmentId = async(departmentId)=>{
+
+    const [results,fields] = await connection.query(`
+        SELECT e.employee_id, e.full_name
+        FROM employees e
+        JOIN departments d ON e.employee_id = d.manager_id
+        WHERE d.department_id = ? 
+    `,[departmentId]);
+
+    return results;
+}
+
+const Employees_ByDepartmentId = async(departmentId)=>{
+    const [results,fields] = await connection.query(`
+        SELECT *
+        FROM employees 
+        WHERE department_id = ?
+    `,[departmentId]);
+
+    return results;
+}
+
+
 module.exports = {
     AllUsersData,
     UserByIdData,
@@ -134,10 +178,18 @@ module.exports = {
 
     AllDepartmentsData,
     DepartmentByIdData,
-    CreateDepartment, 
-    DeleteDepartment, 
+    CreateDepartment,
+    DeleteDepartment,
     EditDepartment,
 
     AllEmployeesData,
-    EmployeeByIdData
+    EmployeeByIdData,
+
+    Assign_Manager,
+    AllManagersData,
+
+    Manager_ByDepartmentId,
+    
+    Employees_ByDepartmentId,
+    
 }

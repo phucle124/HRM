@@ -7,6 +7,7 @@
 </head>
 <body>
    <aside class="topnav">
+        <li><a href="/admin-index">Trang chủ admin</a></li>
         <li><a href="/create-userPage">Tạo tài khoản</a></li>
         <li><a href="/create-departmentPage">Tạo phòng ban</a></li>
         <li><a href="/logout">Đăng xuất</a></li>
@@ -17,20 +18,16 @@
             <legend>Form Department</legend>
             <div class="input-group">
                 <label>Nhập tên phòng:</label>
-                <input type="text" name="name">
+                <input type="text" name="department_name">
             </div>
             <div class="input-group">
                 <label>Chọn quản lý: </label>
                 <select name="manager_id">
-                    <option value="">--Danh sách quản lý phòng hiện tại--</option>
-                        <% employees.forEach(employee => { %>          
-                                <option value="<%= employee.id %>">
-                                    <%= employee.name %> - (ID: <%= employee.id %>)
-                                </option>               
-                        <% }) %>  
+                    <option disabled selected value="">-- Chưa có quản lý (Mặc định) --</option>
+                                               
                 </select>
             </div>
-            <div><button class="btn btn-primary" type="submit">Tạo tài khoản</button></div>
+            <div><button class="btn btn-primary" type="submit">Tạo phòng ban</button></div>
         </fieldset>
     </form>
     </div>

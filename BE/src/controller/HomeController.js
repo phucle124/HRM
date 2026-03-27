@@ -1,24 +1,27 @@
+const session = require('express-session');
 const {login} = require('../services/AuthenticateService');
-const connection = require('../config/db');
-const {AllUsersData ,UserByIdData, CreateUser, UpdateUser, DeleteUser, LockUser, AllDepartmentsData, CreateDepartment, DeleteDepartment, EditDepartment, DepartmentByIdData, AllEmployeesData} = require('../services/CRUDService')
+
+const {AllUsersData ,UserByIdData, CreateUser, UpdateUser, DeleteUser, LockUser, AllDepartmentsData, DepartmentByIdData, EditDepartment, DeleteDepartment, CreateDepartment, EmployeeByIdData, Employees_ByDepartmentId, Manager_BydepartmentId, Manager_ByDepartmentId} = require('../services/CRUDService')
 
 
 
+const getAllUsers = async (req,res)=>{
+
+    res.status(200).json(await AllUsersData());
+}
+
+const getUserById = async (req,res) =>{
+    const userId = req.params.id;
+    let dataUser = await UserByIdData(userId);
+
+    return res.status(200).json({data : dataUser});
+}
 
 
 //EJS Pages
 const HomePage = (req,res)=>{
-    
 
     res.render('home');
-
-}
-
-const Logout = (req,res) =>{
-    //Luôn xoá các thuộc tính cũ ĐÃ LƯU
-    res.locals = {};
-
-    res.render('home', {loggedOut: true})
 }
 
 const LoginPage = (req,res)=>{
@@ -37,80 +40,71 @@ const editUserPage = async (req,res)=>{
     res.render('./admin/editUser',{userEdit: data[0]});
 }
 
-const createDepartmentPage = (req,res)=>{
-    res.render('./admin/createDepartment');
+const admin_index = async (req,res)=>{
+    res.render('./admin/index',{
+        users: await AllUsersData(),
+        departments: await AllDepartmentsData(),
+    });
 }
 
-const editDepartmentPage = (req,res)=>{
-    res.render('./admin/editDepartment')
+const Logout = (req,res)=>{
+    //Luôn xoá các thuộc tính cũ ĐÃ LƯU
+    res.locals = {};
+
+    res.redirect('/');
 }
 
 //Handles
 const LoginHandle = async (req,res) =>{
-
-    //các thuộc tính (body.[thuộc tính]) là thuộc tính lấy trực tiếp từ giao diện    
+    
     const { email, password } = req.body;
-    let dataUser = await login(email,password);
-    // try{
-    //     let dataUser = await login(email,password);
 
-    //     if(!dataUser) return res.status(401).json({message: "Sai emai hoặc mật khẩu"});
+    
+    try{
+        let dataUser = await login(email,password);
+
+        if(!dataUser) return res.status(401).json({message: "Sai emai hoặc mật khẩu"});
 
 
-    //     if(dataUser.is_lock) return res.status(403).json({message: "Tài khoản đã bị khóa"});
+        if(dataUser.is_lock) return res.status(403).json({message: "Tài khoản đã bị khóa"});
 
-    //     return res.status(200).json({
-    //         message: "Đăng nhập thành công",
-    //         data: dataUser
-    //     });
-    // }
-    // catch(err){
-    //     return res.status(404).json({
-    //         message: "Lỗi không tìm thấy người dùng",
-    //         error: err.message
-    //     });
-    // }
+        return res.status(200).json({
+            message: "Đăng nhập thành công",
+            data: dataUser
+        });
+    }
+    catch(err){
+        return res.status(404).json({
+            message: "Lỗi không tìm thấy người dùng",
+            error: err.message
+        });
+    }
 
     
 
     // Dùng để test trên EJS
 
+    // let dataUser = await login(email,password);
+    // if(!dataUser) return res.render('login',{error: "Sai emai hoặc mật khẩu"});
 
-    if(!dataUser) return res.render('login',{error: "Sai emai hoặc mật khẩu"});
 
+    // if(dataUser.is_lock) return res.render('login',{error: "Tài khoản đã bị khóa"});
 
-    if(dataUser.is_lock) return res.render('login',{error: "Tài khoản đã bị khóa"});
-
-    if(dataUser.role == 'admin')
-        return res.render('./admin/index',{
-            users: await AllUsersData(),
-            departments: await AllDepartmentsData(),
-    });
-    else if(dataUser.role == 'hr')
-        return res.render('./hr/index', {user: dataUser});
-    else if(dataUser.role == 'employee')
-        return res.render('./employee/index', {user: dataUser});
-    else 
-        return res.render('NotFound');
+    // if(dataUser.role == 'admin')
+    //    return res.redirect('/admin-index');
+    // else if(dataUser.role == 'hr')
+    //     return res.render('./hr/index', {user: dataUser});
+    // else if(dataUser.role == 'employee')
+    //     return res.render('./employee/index', {user: dataUser});
+    // else 
+    //     return res.render('NotFound');
 }
 
- 
+  
 
-const getAllUsers = async (req,res)=>{
-
-    res.status(200).json(await AllUsersData());
-}
-
-const getUserById = async (req,res) =>{
-    const userId = req.params.id;
-    let data = await UserByIdData(userId);
-
-    return res.status(200).json({data});
-}
 
 const createUser = async(req,res)=>{
 
-    //các thuộc tính (body.[thuộc tính]) là thuộc tính lấy trực tiếp từ giao diện
     const name = req.body.name;
     const email = req.body.email;
     const password = req.body.password;
@@ -124,231 +118,242 @@ const createUser = async(req,res)=>{
 
 
     //API
-    // if(name==''||email=='' || password==''||phone==''|| role==''){
-    //     return res.status(400).json({
-    //         message: "Vui lòng nhập đầy đủ thông tin"
-    //     })
-    // }
+    if(name==''||email=='' || password==''||phone==''|| role==''){
+        return res.status(400).json({
+            message: "Vui lòng nhập đầy đủ thông tin"
+        })
+    }
     
-    // try{
-    //     let data = await CreateUser(name,email,password,phone,role);
+    try{
+        let dataCreateUsr = await CreateUser(name,email,password,phone,role);
 
-    //     return res.status(201).json({
-    //         message:"Tạo user thành công",
-    //         data
-    //     });
-    // }
-    // catch(err){
-    //     return res.status(500).json({
-    //         message:"Lỗi server nội bộ",
-    //         error: err.message
-    //     })
-    // }
+        return res.status(200).json({
+            message:"Tạo user thành công",
+            data: dataCreateUsr
+        });
+    }
+    catch(err){
+        return res.status(500).json({
+            message:"Lỗi server nội bộ",
+            error: err.message
+        })
+    }
 
 
     //EJS TEST
 
-
-    let data = await CreateUser(name,email,password,phone,role);
-
-    if(data.affectedRows > 0){
-        console.log('Tài khoản được thêm: ' , data.results);
-        res.render('./admin/index',{users: await getAllUsers()});
-    }
+    //     console.log('Tài khoản được thêm: ' , data.results);
+    //     res.redirect('/admin-index');
 
 }
 
 const editUser = async(req,res)=>{
-    const uid = req.body.id;
- 
-    //các thuộc tính (body.[thuộc tính]) là thuộc tính lấy trực tiếp từ giao diện    
+    const id = req.body.id;
+    
     const name = req.body.name;
     const email = req.body.email;
     const password = req.body.password;
     const phone = req.body.phone;
     const role = req.body.role;
 
+
+
     //EJS TEST
-    if(data.affectedRows > 0){
-        res.render('./admin/index',{users: await getAllUsers()});
-    }
+    // 
+    //     res.redirect('/admin-index');
+    // 
 
 
     //API
-    // try{
-    //     let data = await UpdateUser(uid,name,email,password,phone, role);
+    try{
+        let dataUpdtUsr = await UpdateUser(id,name,email,password,phone, role);
 
-    //     return res.status(200).json({
-    //         message:"Cập nhật thành công",
-    //         data
-    //     });
-    // }
-    // catch(err){
-    //     return res.status(500).json({
-    //         message:"Lỗi server nội bộ",
-    //         error: err.message
-    //     })
-    // }
+        return res.status(200).json({
+            message:"Cập nhật thành công",
+            data: dataUpdtUsr
+        });
+    }
+    catch(err){
+        return res.status(500).json({
+            message:"Lỗi server nội bộ",
+            error: err.message
+        })
+    }
 }
 
 const deleteUser = async(req,res)=>{
-    const uid = req.params.id;
+    const id = req.params.id;
   
     //API
-    // try{
-    //     let data = await  DeleteUser(uid);
+    try{
+        let dataDelUsr = await  DeleteUser(id);
 
-    //     console.log('Đã xóa thành công 1 user');
+        console.log('Đã xóa thành công 1 user');
 
-    //     return res.status(200).json({
-    //         message:"Xoá thành công",
-    //         data
-    //     });
+        return res.status(200).json({
+            message:"Xoá thành công",
+            data: dataDelUsr
+        });
         
-    // }
-    // catch(err){
-    //     return res.status(500).json({
-    //         message:"Lỗi server nội bộ",
-    //         error: err.message
-    //     })
-    // }
+    }
+    catch(err){
+        return res.status(500).json({
+            message:"Lỗi server nội bộ",
+            error: err.message
+        })
+    }
 
     //EJS TEST
-    res.render('./admin/index',{users: await AllUsersData()});
+    // res.redirect('/admin-index');
 }
 
 
 
 const lockUser = async (req,res)=>{
     const uid = req.params.id;
+    const isLock = parseInt(req.body.isLock);
 
-    //các thuộc tính (body.[thuộc tính]) là thuộc tính lấy trực tiếp từ giao diện
-    const isLock = parseInt(req.body.is_lock);
-    LockUser(uid,isLock);
     //EJS test
-    return res.render('./admin/index',{users: await AllUsersData()});
+    // await LockUser(uid,isLock);
+    // res.redirect('/admin-index');
 
     //API
-    // try{
-    //     let data = await LockUser(uid,isLock);
-    //     return res.status(200).json({
-    //         message:"Đã cập nhật trạng thái của khoá (lock)",
-    //         data
-    //     });
-    // }
-    // catch(err){
-    //     return res.status(500).json({
-    //         message:"Lỗi máy chủ nội bộ",
-    //         error: err.message
-    //     })
-    // }
+    try{
+        let dataLockUsr = await LockUser(uid,isLock);
+        return res.status(200).json({
+            message:"Đã cập nhật trạng thái của khoá (lock)",
+            data: dataLockUsr
+        });
+    }
+    catch(err){
+        return res.status(500).json({
+            message:"Lỗi máy chủ nội bộ",
+            error: err.message
+        })
+    }
 }
 
 const getAllDepartments = async(req,res)=>{
-    let data = await AllDepartmentsData();
+    let dataDept = await AllDepartmentsData();
 
     //API
-    return res.status(200).json({data}) ;
+    return res.status(200).json({data: dataDept}) ;
 }
 
 const getDepartmentById = async(req,res)=>{
-
-    const depart_id = req.params.id;
-
-    let data = await DepartmentByIdData(depart_id);
+    let dataDept = await DepartmentByIdData();
 
     //API
-    return res.status(200).json({data});
+    return res.status(200).json({data:dataDept});
+}
+
+const createDepartmentPage = (req,res)=>{
+    res.render('./admin/createDepartment');
 }
 
 const createDepartment = async(req,res)=>{
-
-    //các thuộc tính (body.[thuộc tính]) là thuộc tính lấy trực tiếp từ giao diện    
-    const Department_Name = req.body.department_name;
     
-
-    //API
-
-    // if(Department_Name == '')
-    //     return res.status(400).json({message: "Vui lòng nhập đầy đủ thông tin"});
-
-    // try{
-    //     let data = await CreateDepartment(Department_Name);
-
-    //     return res.status(201).json({
-    //         message:"Đã thêm phòng ban",
-    //         data
-    //     })
-    // }
-    // catch(err){
-
-    //     return res.status(500).json({
-    //         message:"Lỗi máy chủ nội bộ",
-    //         error: err.message
-    //     })
-    // }
+    const department_Name = req.body.department_name?.trim();  
+    const manager_Id = req.body.manager_id;
 
 
-    //EJS
+    //EJS TEST
+    // let data = await CreateDepartment(department_Name, manager_Id);
 
+    // res.redirect('/admin-index');
 
-    let data = await CreateDepartment(Department_Name);
-    if(data.affectedRows > 0)
-        res.render('./admin/index',{departments: await AllDepartmentsData});
+    try {
+
+        if (!department_Name) {
+            return res.status(400).json({
+                message: "Thiếu tên phòng ban"
+            });
+        }
+
+        const data = await CreateDepartment(department_Name, manager_Id);
+
+        return res.status(201).json({
+            message: "Tạo phòng ban thành công",
+            data
+        });
+
+    } catch (err) {
+        return res.status(500).json({
+            error: err.message
+        });
+    }
+   
 }
 
-const deleteDepartment = async(req,res)=>{
-    const depart_id = req.params.id;
+const editDepartmentPage = async (req,res)=>{
 
-    //API
-    // try{
-    //     let data = await DeleteDepartment(depart_id);
+    const DepartmentId = req.params.id;
 
-    //     return res.status(200).json({
-    //         message:"Xoá phòng ban thành công",
-    //         data
-    //     });
-        
-    // }
-    // catch(err){
-    //     return res.status(500).json({
-    //         message:"Lỗi server nội bộ",
-    //         error: err.message
-    //     })
-    // }
+    let DepartmentById = await DepartmentByIdData(DepartmentId);
 
-    let data = await DeleteDepartment(depart_id);
+    let EmployeesBy_DepartmentId = await Employees_ByDepartmentId(DepartmentId);
 
-    res.render('./admin/index',{departments: await AllDepartmentsData()});
+    let CurrentManagerBy_DepartmentId = await Manager_ByDepartmentId(DepartmentId);
 
+
+    res.render('./admin/editDepartment',{
+        department_id: DepartmentId,
+        departmentEdit: DepartmentById[0],
+        employeesEdit: EmployeesBy_DepartmentId,
+        currentManagerEdit: CurrentManagerBy_DepartmentId[0],
+    });
 }
 
 const editDepartment = async(req,res)=>{
-
-    const depart_id = req.params.id;
-
-    //các thuộc tính (body.[thuộc tính]) là thuộc tính lấy trực tiếp từ giao diện
+    
+    const DepartmentId = req.body.department_id;
+    
     const Department_Name = req.body.department_name;
-    const Manager_Id = req.body.manager_id;
+    const managerId = req.body.manager_id;
+       
+    //EJS TEST
+    // let data = await EditDepartment(DepartmentId,Department_Name,managerId);
 
-    // try{
-    //     let data = await EditDepartment(depart_id,Department_Name,Manager_Id);
+    // res.redirect('/admin-index');
 
-    //      return res.status(200).json({
-    //         message:"Cập nhật phòng ban thành công",
-    //         data
-    //     });
-    // }
-    // catch(err){
-    //     return res.status(500).json({
-    //         message:"Lỗi server nội bộ",
-    //         error: err.message
-    //     })
-    // }
+    try {
 
-    let data = await EditDepartment(depart_id,Department_Name,Manager_Id);
-    if(data.affectedRows > 0)
-    res.render('./admin/index',{departments: await AllDepartmentsData()});
+        const dataEditDept = await EditDepartment(DepartmentId, Department_Name, managerId);
+
+        return res.status(200).json({
+            message: "Cập nhật phòng ban thành công!",
+            data: dataEditDept
+        });
+
+    } catch (err) {
+        return res.status(500).json({
+            message: err.message
+        });
+    }
+    
+}
+
+const deleteDepartment = async(req,res)=>{
+    const DepartmentId = req.params.id;
+
+    //EJS TEST 
+    // let data = await DeleteDepartment(DepartmentId);
+
+    // res.redirect('/admin-index');
+
+    try {
+        const dataDelDept = await DeleteDepartment(DepartmentId);
+
+        return res.status(200).json({
+            message: "Đã xóa phòng ban",
+            data: dataDelDept
+        });
+
+    } catch (err) {
+        return res.status(500).json({
+            message: err.message
+        });
+    }
 }
 
 
@@ -360,6 +365,8 @@ module.exports = {
     LoginHandle,
     Logout,
 
+    admin_index,
+
     createUserPage,
     createUser,
 
@@ -367,7 +374,6 @@ module.exports = {
     editUser,
 
     deleteUser,
-
     lockUser,
 
     getAllDepartments,
@@ -376,8 +382,9 @@ module.exports = {
     createDepartmentPage,
     createDepartment,
 
-    deleteDepartment,
-
     editDepartmentPage,
-    editDepartment
+    editDepartment,
+
+    deleteDepartment
+
 }

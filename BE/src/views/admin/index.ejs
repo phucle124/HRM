@@ -4,17 +4,19 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>List users</title>
+    <link rel="stylesheet" href="https://cdn.datatables.net/2.3.7/css/dataTables.dataTables.css">
 </head>
 <body>
-    <aside class="topnav">
+
+   <aside class="topnav">
+        <li><a href="/admin-index">Trang chủ admin</a></li>
         <li><a href="/create-userPage">Tạo tài khoản</a></li>
         <li><a href="/create-departmentPage">Tạo phòng ban</a></li>
         <li><a href="/logout">Đăng xuất</a></li>
     </aside>
 
-    <h2>Danh sách tài khoản</h2>
     <div>
-        <table border="2px" cellspacing="10">
+        <table id="usersTable" border="2px" cellspacing="10" class="display">
             <thead>
                 <th>id</th>
                 <th>name</th>
@@ -38,26 +40,30 @@
                             <span>|</span>
                             <a href="/delete-user/<%=user.id%>">Xóa</a>
                             <span>|</span>
-                            <form action="/lock/<%=user.id%>" method="POST">
-                                <select name="isLock" onchange="this.form.submit()">
-                                    <option value="0" <%= user.is_lock == 0 ? 'selected' : '' %> >Mở</option>
-                                    <option value="1" <%= user.is_lock == 1 ? 'selected' : '' %> >Khóa(lock)</option>
-                                </select>
-                            </form>
+                            <div class="lock-group">
+                                <label for="Lock_status">Trạng thái tài khoản:</label>
+                                <form class="Lock_status" action="/lock/<%=user.id%>" method="POST">
+                                    <select name="isLock" onchange="this.form.submit()">
+                                        <option value="0" <%= user.is_lock == 0 ? 'selected' : '' %> >Mở</option>
+                                        <option value="1" <%= user.is_lock == 1 ? 'selected' : '' %> >Khóa(lock)</option>
+                                    </select>
+                                </form>
+                            </div>
                         </td>
                     </tr>
                 <% }) %>
             </tbody>
         </table>
+        
     </div>
 
     <h2>Danh sách phòng ban</h2>
     <div>
-        <table border="2px" cellspacing="10">
+        <table id="departmentsTable" border="2px" cellspacing="10" class="display">
             <thead>
                 <th>id</th>
                 <th>name</th>
-                <th>manager's id</th>
+                <th>manager id</th>
                 <th>Action</th>
             </thead>
             <tbody>
@@ -70,12 +76,7 @@
                             <a href="/edit-department/<%=department.department_id%>">Sửa</a>
                             <span>|</span>
                             <a href="/delete-department/<%=department.department_id%>">Xóa</a>
-                            <span>|</span>
-                            <!-- <form action="/lock/<%=department.id%>" method="POST">
-                                <select name="isLock" onchange="this.form.submit()">
-                                    
-                                </select>
-                            </form> -->
+                            
                         </td>
                     </tr>
                 <% }) %>
@@ -83,6 +84,12 @@
         </table>
     </div>
 
+<script src="https://code.jquery.com/jquery-3.7.1.js"></script>
+<script src="https://cdn.datatables.net/2.3.7/js/dataTables.js"></script>
+
+    <script>
+        new DataTable('#usersTable, #departmentsTable');
+    </script>
 </body>
 </html>
 
@@ -91,5 +98,10 @@
         background: rgb(255, 97, 97);
         font-weight: bold;
         color: rgb(205, 205, 68);
+    }
+    .lock-group{
+        display: flex;
+        align-items: center;
+        gap: 5%;
     }
 </style>

@@ -3,7 +3,8 @@
 const express = require('express');
 const router = express.Router();
 
-const { HomePage, LoginPage , LoginHandle, createUser, editUser, editUserPage, deleteUser, lockUser, createUserPage, createDepartment, createDepartmentPage, editDepartment, deleteDepartment, editDepartmentPage, Logout} = require('../controller/HomeController');
+const { HomePage, LoginPage , LoginHandle, createPage, createUser, editUser, editPage, deleteUser, lockUser, createUserPage, editUserPage, createDepartmentPage, createDepartment, editDepartmentPage, editDepartment, deleteDepartment, admin_index, Logout} = require('../controller/HomeController');
+const { validate_EditDepartment, validate_CreateDepartment } = require('../middleware/validate');
 
 
 
@@ -14,6 +15,10 @@ router.get('/login', LoginPage);
 router.post('/login', LoginHandle);
 
 router.get('/logout', Logout);
+
+
+// redirect admin EJS
+router.get('/admin-index', admin_index);
 
 
 // CRUD Users

@@ -7,34 +7,48 @@
 </head>
 <body>
    <aside class="topnav">
+        <li><a href="/admin-index">Trang chủ admin</a></li>
         <li><a href="/create-userPage">Tạo tài khoản</a></li>
         <li><a href="/create-departmentPage">Tạo phòng ban</a></li>
         <li><a href="/logout">Đăng xuất</a></li>
     </aside>
     <div class="form-add-new">
-        <form action="/create-department" method="POST">
+        <form action="/edit-department" method="POST">
         <fieldset>
             <legend>Form edit department</legend>
              <div class="input-group">
-                <label>id:</label>
-                <input type="text" name="department_id" value="<%=DepartmentEdit.department_id%>">
+                <label>Mã phòng:</label>
+                <input type="text" name="department_id" value="<%=department_id%>" readonly>
             </div>
             <div class="input-group">
-                <label>Nhập tên phòng:</label>
-                <input type="text" name="department_name" value="<%=DepartmentEdit.name%>">
+                <label>Tên phòng hiện tại:</label>
+                <input type="text" name="department_name" value="<%=departmentEdit.name%>">
             </div>
             <div class="input-group">
-                <label>Chọn quản lý: </label>
+                <label>Quản lý hiện tại: </label>
                 <select name="manager_id">
-                    <option value="">--Danh sách quản lý phòng hiện tại--</option>
-                        <% employees.forEach(employee => { %>          
-                                <option value="<%= employee.id %>">
-                                    <%= employee.name %> - (ID: <%= employee.id %>)
-                                </option>               
+                     <% if(currentManagerEdit){ %>
+                        <option value="<%= currentManagerEdit.employee_id %>">
+                            <%= currentManagerEdit.full_name %> - (ID: <%= currentManagerEdit.employee_id %>)
+                        </option>
+                    <% } else { %>
+                        <option selected disabled value="">Chưa có quản lý</option>
+                    <% } %>
+
+                    <% if(employeesEdit && employeesEdit.length > 0){ %>
+                        <% employeesEdit.forEach(employee => { %>          
+                            <% if(!currentManagerEdit || employee.employee_id != currentManagerEdit.employee_id){ %>
+                                <option value="<%= employee.employee_id %>">
+                                    <%= employee.full_name %> - (ID: <%= employee.employee_id %>)
+                                </option> 
+                            <% } %>
                         <% }) %>  
+                    <% } else { %>
+                        <option selected disabled value="">Chưa có nhân viên</option>
+                    <% } %>
                 </select>
             </div>
-            <div><button class="btn btn-primary" type="submit">Tạo tài khoản</button></div>
+            <div><button class="btn btn-primary" type="submit">Sửa phòng ban</button></div>
         </fieldset>
     </form>
     </div>
