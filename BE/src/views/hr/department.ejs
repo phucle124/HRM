@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quản lý Phòng ban</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css">
+    <style>
+        body { padding: 20px; }
+        .alert { margin-top: 20px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1 class="mb-4">Quản lý Phòng ban</h1>
+
+        <% if (errorMessage) { %>
+            <div class="alert alert-danger" role="alert">
+                <%= decodeURIComponent(errorMessage) %>
+            </div>
+        <% } %>
+
+        <a href="/hr/departments/add" class="btn btn-success mb-3">Thêm Phòng ban mới</a>
+
+        <table class="table table-bordered table-striped">
+            <thead class="table-dark">
+                <tr>
+                    <th>Mã Phòng ban</th>
+                    <th>Tên Phòng ban</th>
+                    <th>Trưởng phòng</th>
+                    <th>Thao tác</th>
+                </tr>
+            </thead>
+            <tbody>
+                <% if(departments && departments.length > 0) { %>
+                    <% departments.forEach(dept => { %>
+                        <tr>
+                            <td><%= dept.department_id %></td>
+                            <td><%= dept.name %></td>
+                            <td><%= dept.manager_name || 'Chưa có' %></td>
+                            <td>
+                                <a href="/hr/departments/<%= dept.department_id %>/employees" class="btn btn-info btn-sm">Xem NV</a>
+                                <a href="/hr/departments/edit/<%= dept.department_id %>" class="btn btn-warning btn-sm">Sửa</a>
+                                <a href="/hr/departments/delete/<%= dept.department_id %>" class="btn btn-danger btn-sm" onclick="return confirm('Bạn có chắc chắn muốn xóa phòng ban này?');">Xóa</a>
+                            </td>
+                        </tr>
+                    <% }) %>
+                <% } else { %>
+                    <tr>
+                        <td colspan="4" class="text-center">Không có phòng ban nào để hiển thị.</td>
+                    </tr>
+                <% } %>
+            </tbody>
+        </table>
+        <a href="/hr" class="btn btn-secondary mt-3">Quay lại Dashboard</a>
+    </div>
+</body>
+</html>

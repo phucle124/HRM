@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sửa thông tin Nhân viên</title>
+     <style>
+        body { font-family: Arial, sans-serif; }
+        .form-container { width: 50%; margin: auto; padding: 20px; border: 1px solid #ccc; border-radius: 5px; }
+        .input-group { margin-bottom: 15px; }
+        .input-group label { display: block; margin-bottom: 5px; }
+        .input-group input, .input-group select { width: 100%; padding: 8px; box-sizing: border-box; }
+        .btn { padding: 10px 15px; background-color: #28a745; color: white; border: none; cursor: pointer; }
+    </style>
+</head>
+<body>
+    <div class="form-container">
+        <h2>Form Sửa thông tin Nhân viên</h2>
+        <% if(employee) { %>
+        <form action="/hr/edit" method="POST">
+            <input type="hidden" name="id" value="<%= employee.id %>">
+            
+            <div class="input-group">
+                <label for="name">Họ và tên:</label>
+                <input type="text" id="name" name="name" value="<%= employee.name %>" required>
+            </div>
+            <div class="input-group">
+                <label for="email">Email:</label>
+                <input type="email" id="email" name="email" value="<%= employee.email %>" required>
+            </div>
+            <div class="input-group">
+                <label>Mật khẩu:</label>
+                <p><i>(Không thể thay đổi mật khẩu ở đây)</i></p>
+            </div>
+            <div class="input-group">
+                <label for="department_id">Phòng ban:</label>
+                <select id="department_id" name="department_id" required>
+                    <option value="">-- Chọn phòng ban --</option>
+                    <% departments.forEach(dept => { %>
+                        <option value="<%= dept.id %>" <%= (employee.department_id == dept.id) ? 'selected' : '' %>>
+                            <%= dept.name %>
+                        </option>
+                    <% }) %>
+                </select>
+            </div>
+            <button type="submit" class="btn">Cập nhật</button>
+            <a href="/hr">Quay lại</a>
+        </form>
+        <% } else { %>
+            <p>Không tìm thấy thông tin nhân viên.</p>
+        <% } %>
+    </div>
+</body>
+</html>
