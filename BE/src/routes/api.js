@@ -7,7 +7,8 @@ const HRController = require('../controller/HRController');
 const ManagerController = require('../controller/ManagerController'); // Đã gộp lại một chỗ
 const { 
     getAllUsers, getUserById, deleteUser, editUser, createUser, 
-    LoginHandle, lockUser 
+    LoginHandle, lockUser, getAllDepartments, getDepartmentById, 
+    createDepartment, editDepartment, deleteDepartment, getEmployeesByDepartment 
 } = require('../controller/HomeController');
 
 // --- DANH SÁCH API ---
@@ -24,12 +25,12 @@ router.delete('/users/:id', deleteUser);
 router.patch('/users/:id/lock', lockUser); 
 
 // Department Management
-router.get('/departments', DepartmentController.getAllDepartments);
-router.post('/departments', DepartmentController.createDepartment);
-router.get('/departments/:id', DepartmentController.getDepartmentById);
-router.put('/departments/:id', DepartmentController.updateDepartment);
-router.delete('/departments/:id', DepartmentController.deleteDepartment);
-router.get('/departments/:id/employees', DepartmentController.getEmployeesInDepartment);
+router.get('/departments', getAllDepartments); 
+router.get('/departments/:id', getDepartmentById);
+router.post('/departments', createDepartment);
+router.put('/departments/:id', editDepartment);
+router.delete('/departments/:id', deleteDepartment);
+router.get('/departments/:id/employees', getEmployeesByDepartment);
 
 // Employee Management (HR)
 router.get('/employees', HRController.getAllEmployees);
