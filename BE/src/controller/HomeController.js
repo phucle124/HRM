@@ -1,5 +1,7 @@
 const session = require('express-session');
 const {login} = require('../services/AuthenticateService');
+const CRUDService = require('../services/CRUDService'); 
+
 
 const {AllUsersData ,UserByIdData, CreateUser, UpdateUser, DeleteUser, LockUser, AllDepartmentsData, DepartmentByIdData, EditDepartment, DeleteDepartment, CreateDepartment, EmployeeByIdData, Employees_ByDepartmentId, Manager_BydepartmentId, Manager_ByDepartmentId} = require('../services/CRUDService')
 
@@ -357,6 +359,21 @@ const deleteDepartment = async(req,res)=>{
     }
 }
 
+const getEmployeesByDepartment = async (req, res) => {
+    try {
+        let departmentId = req.params.id; // Lấy ID từ URL
+        
+        // Gọi hàm từ CRUDService
+        let data = await CRUDService.Employees_ByDepartmentId(departmentId);
+        
+        return res.status(200).json({
+            message: "Thành công",
+            data: data
+        });
+    } catch (error) {
+        return res.status(500).json({ message: "Lỗi server", error: error.message });
+    }
+};
 
 module.exports = {
     getAllUsers,
@@ -379,6 +396,7 @@ module.exports = {
 
     getAllDepartments,
     getDepartmentById,
+    getEmployeesByDepartment,
 
     createDepartmentPage,
     createDepartment,

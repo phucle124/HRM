@@ -1,10 +1,10 @@
 const express = require('express');
 const router = express.Router();
-const DepartmentController = require('../controller/DepartmentController');
+// const DepartmentController = require('../controller/DepartmentController');
 // Nếu bạn có dùng cả HRController thì thêm luôn dòng dưới:
 const HRController = require('../controller/HRController');
 
-const { getAllUsers, getUserById, deleteUser, editUser, createUser, LoginHandle, lockUser, getAllDepartments, getDepartmentById, createDepartment, editDepartment, deleteDepartment } = require('../controller/HomeController');
+const { getAllUsers, getUserById, deleteUser, editUser, createUser, LoginHandle, lockUser, getAllDepartments, getDepartmentById, createDepartment, editDepartment, deleteDepartment, getEmployeesByDepartment } = require('../controller/HomeController');
 
 //Danh sách API (cần gửi về FE)
 
@@ -17,12 +17,12 @@ router.put('/users/:id',editUser) //(chuc nang cua admin)
 router.delete('/users/:id', deleteUser); //(chuc nang cua admin)
 router.patch('/users/:id/lock',lockUser); // Lock/Unlock các tài khoản users (chức năng của admin)
 
-router.get('/departments', DepartmentController.getAllDepartments);
-router.post('/departments', DepartmentController.createDepartment);
-router.get('/departments/:id', DepartmentController.getDepartmentById);
-router.put('/departments/:id', DepartmentController.updateDepartment);
-router.delete('/departments/:id', DepartmentController.deleteDepartment);
-router.get('/departments/:id/employees', DepartmentController.getEmployeesInDepartment);
+router.get('/departments',getAllDepartments); //Get all columns Departments (chức năng của admin)
+router.get('/departments/:id', getDepartmentById);
+router.post('/departments', createDepartment);
+router.put('/departments/:id', editDepartment);
+router.delete('/departments/:id', deleteDepartment);
+router.get('/departments/:id/employees', getEmployeesByDepartment);
 
 // Employee Management API
 router.get('/employees', HRController.getAllEmployees);
