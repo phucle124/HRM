@@ -1,22 +1,29 @@
 const express = require('express');
 const router = express.Router();
+
+// 1. Khai báo các Controller
 const DepartmentController = require('../controller/DepartmentController');
-// Nếu bạn có dùng cả HRController thì thêm luôn dòng dưới:
 const HRController = require('../controller/HRController');
+const ManagerController = require('../controller/ManagerController'); // Đã gộp lại một chỗ
+const { 
+    getAllUsers, getUserById, deleteUser, editUser, createUser, 
+    LoginHandle, lockUser 
+} = require('../controller/HomeController');
 
-const { getAllUsers, getUserById, deleteUser, editUser, createUser, LoginHandle, lockUser, getAllDepartments, getDepartmentById, createDepartment, editDepartment, deleteDepartment } = require('../controller/HomeController');
+// --- DANH SÁCH API ---
 
-//Danh sách API (cần gửi về FE)
-
+// Auth API
 router.post('/login', LoginHandle);
 
-router.get('/users', getAllUsers); //Get all colums users (chuc nang cua admin)
-router.get('/users/:id', getUserById); //Get user by ID (chuc nang cua admin)
-router.post('/users', createUser); //(chuc nang cua admin)
-router.put('/users/:id',editUser) //(chuc nang cua admin)
-router.delete('/users/:id', deleteUser); //(chuc nang cua admin)
-router.patch('/users/:id/lock',lockUser); // Lock/Unlock các tài khoản users (chức năng của admin)
+// User Management (Admin)
+router.get('/users', getAllUsers); 
+router.get('/users/:id', getUserById); 
+router.post('/users', createUser); 
+router.put('/users/:id', editUser);
+router.delete('/users/:id', deleteUser); 
+router.patch('/users/:id/lock', lockUser); 
 
+// Department Management
 router.get('/departments', DepartmentController.getAllDepartments);
 router.post('/departments', DepartmentController.createDepartment);
 router.get('/departments/:id', DepartmentController.getDepartmentById);
@@ -24,11 +31,17 @@ router.put('/departments/:id', DepartmentController.updateDepartment);
 router.delete('/departments/:id', DepartmentController.deleteDepartment);
 router.get('/departments/:id/employees', DepartmentController.getEmployeesInDepartment);
 
-// Employee Management API
+// Employee Management (HR)
 router.get('/employees', HRController.getAllEmployees);
 router.post('/employees', HRController.createEmployee);
 router.get('/employees/:id', HRController.getEmployeeById);
 router.put('/employees/:id', HRController.updateEmployee);
 router.delete('/employees/:id', HRController.deleteEmployee);
+
+// --- ROLE MANAGER ---
+// Link test: http://localhost:8888/manager/staff-list
+router.get('/manager/staff-list', ManagerController.getStaffPage);
+// Link duyệt nghỉ phép: http://localhost:8888/manager/approve-leave
+router.post('/manager/approve-leave', ManagerController.approveLeave);
 
 module.exports = router;
