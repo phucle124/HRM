@@ -1,0 +1,30 @@
+@import url('https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700;800&family=Manrope:wght@400;500;600;700;800&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html {
+    font-family: 'Geist', 'Manrope', system-ui, sans-serif;
+  }
+
+  body {
+    @apply bg-canvas text-stone-900 antialiased;
+  }
+
+  * {
+    @apply border-line;
+  }
+}
+
+@layer utilities {
+  .shadow-soft {
+    box-shadow: 0 20px 40px -30px rgba(90, 74, 61, 0.35);
+  }
+
+  .page-shell {
+    background-image: radial-gradient(circle at top left, rgba(183, 157, 132, 0.12), transparent 26%),
+      radial-gradient(circle at bottom right, rgba(216, 202, 188, 0.2), transparent 28%);
+  }
+}
