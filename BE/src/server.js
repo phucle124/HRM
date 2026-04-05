@@ -7,12 +7,13 @@ const express = require('express');
 //Dùng EJS để test hiển thị trên giao diện(Phía BE)
 const webRoute = require('./routes/web');
 
+//API
 const apiRoute = require('./routes/api');
 
 const db = require('./config/db');
 
 const config_ViewEngine = require('./config/viewEngine');
-
+const {sessionConfig} = require('./config/session');
 
 //config app BackEnd
 const app = express();
@@ -29,8 +30,9 @@ config_ViewEngine(app); //Cố định view engine để test với EJS
 
 //MiddleWares
 app.use(cors()); //dùng cho React thì mới làm việc với BE(NodeJS) đc
+app.use(sessionConfig());
 
-
+//Các Routers
 //app.use('/', webRoute);
 app.use('/', apiRoute);
 

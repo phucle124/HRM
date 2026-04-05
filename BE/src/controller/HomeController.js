@@ -1,4 +1,4 @@
-const session = require('express-session');
+
 const {login} = require('../services/AuthenticateService');
 const CRUDService = require('../services/CRUDService'); 
 
@@ -70,10 +70,18 @@ const LoginHandle = async (req,res) =>{
 
         if(dataUser.is_lock) return res.status(403).json({message: "Tài khoản đã bị khóa"});
 
+        // LƯU VÀO SESSION 
+        req.session.user = {
+            id: dataUser.id,
+            name: dataUser.name,
+            role: dataUser.role 
+        };
+
         return res.status(200).json({
             message: "Đăng nhập thành công",
             data: dataUser
         });
+
     }
     catch(err){
         return res.status(404).json({

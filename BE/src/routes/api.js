@@ -10,17 +10,26 @@ const {
     LoginHandle, lockUser, getAllDepartments, getDepartmentById, 
     createDepartment, editDepartment, deleteDepartment, getEmployeesByDepartment 
 } = require('../controller/HomeController');
+const { validateEmail, validatePassword, validatePhone } = require('../middlewares/validate');
+const checkRole = require('../middlewares/Authorizate');
+
+
+//Áp dụng middleware phân quyền cho API login
+router.use((req, res, next) => {
+    if (req.path === '/login') return next();
+    checkRole(req, res, next);
+});
 
 // --- DANH SÁCH API ---
 
 // Auth API
-router.post('/login', LoginHandle);
+router.post('/login', validateEmail, validatePassword, LoginHandle);
 
 // User Management (Admin)
 router.get('/users', getAllUsers); 
 router.get('/users/:id', getUserById); 
-router.post('/users', createUser); 
-router.put('/users/:id', editUser);
+router.post('/users', validateEmail, validatePassword, validatePhone,createUser); 
+router.put('/users/:id',validateEmail, validatePassword, validatePhone, editUser);
 router.delete('/users/:id', deleteUser); 
 router.patch('/users/:id/lock', lockUser); 
 
