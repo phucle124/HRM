@@ -3,14 +3,7 @@ const router = express.Router();
 const EmployeeController = require('../controller/EmployeeController');
 
 
-// Link lấy Profile: http://localhost:8888/api/employee/profile/4
-router.get('/employee/profile/:id', EmployeeController.getProfile);
 
-// Link Điểm danh: POST http://localhost:8888/api/employee/check-in
-router.post('/employee/check-in', EmployeeController.checkIn);
-
-// Link xem Lương: http://localhost:8888/api/employee/salary/2
-router.get('/employee/salary/:id', EmployeeController.getSalary);
 
 // 1. Khai báo các Controller
 const DepartmentController = require('../controller/DepartmentController');
@@ -64,5 +57,16 @@ router.delete('/employees/:id', HRController.deleteEmployee);
 router.get('/manager/staff-list', ManagerController.getStaffPage);
 // Link duyệt nghỉ phép: http://localhost:8888/manager/approve-leave
 router.post('/manager/approve-leave', ManagerController.approveLeave);
+
+
+//Employee
+// Link lấy Profile: http://localhost:8888/api/employee/profile/4
+router.get('/employee/profile/:id', EmployeeController.getProfile);
+
+// Link Điểm danh: POST http://localhost:8888/api/employee/check-in
+router.post('/employee/check-in', EmployeeController.checkIn);
+
+// Link xem Lương: http://localhost:8888/api/employee/salary/2
+router.get('/employee/salary/:id', EmployeeController.getSalary);
 
 module.exports = router;
