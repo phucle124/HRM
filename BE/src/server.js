@@ -16,9 +16,11 @@ app.use(express.urlencoded({extended:true}));
 app.use(express.json());
 
 app.use(cors({
-    origin: 'http://localhost:5173', // Cổng của React
+    origin: 'https://hrm-fe.42web.io', // Cổng của React
     credentials: true                // Cho phép gửi Session/Cookie
 }));
+
+app.set('trust proxy', 1); //Giúp express tin tưởng vào proxy này
 
 // --- GIỮ NGUYÊN CẤU HÌNH CŨ ---
 config_ViewEngine(app);
