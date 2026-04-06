@@ -27,7 +27,7 @@ router.use((req, res, next) => {
 // --- DANH SÁCH API ---
 
 // Auth API
-router.post('/login', validateEmail, validatePassword, LoginHandle);
+router.post('/login', LoginHandle);
 
 // User Management (Admin)
 router.get('/users', getAllUsers); 
