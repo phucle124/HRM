@@ -6,7 +6,7 @@ const router = express.Router();
 const { HomePage, LoginPage , LoginHandle, createPage, createUser, editUser, editPage, deleteUser, lockUser, createUserPage, editUserPage, createDepartmentPage, createDepartment, editDepartmentPage, editDepartment, deleteDepartment, admin_index, Logout} = require('../controller/HomeController');
 const { validate_EditDepartment, validate_CreateDepartment } = require('../middlewares/validate');
 
-//Áp dụng middleware phân quyền cho API login
+//Áp dụng middleware phân quyền cho API login,home,logout
 router.use((req, res, next) => {
     if (req.path === '/login' || req.path === '/' || req.path === '/logout') return next();
     checkRole(req, res, next);
