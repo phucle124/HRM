@@ -4,7 +4,7 @@ const express = require('express');
 const router = express.Router();
 
 const { HomePage, LoginPage , LoginHandle, createPage, createUser, editUser, editPage, deleteUser, lockUser, createUserPage, editUserPage, createDepartmentPage, createDepartment, editDepartmentPage, editDepartment, deleteDepartment, admin_index, Logout} = require('../controller/HomeController');
-const { validate_EditDepartment, validate_CreateDepartment } = require('../middleware/validate');
+const { validate_EditDepartment, validate_CreateDepartment } = require('../middlewares/validate');
 
 //Áp dụng middleware phân quyền cho API login
 router.use((req, res, next) => {

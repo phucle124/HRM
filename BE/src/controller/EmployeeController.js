@@ -55,7 +55,8 @@ exports.getSalary = async (req, res) => {
         );
         if (rows.length === 0) return res.status(404).json({ message: "Chưa có lương" });
         return res.status(200).json(rows);
-    } catch (error) {
-        return res.status(500).json({ message: "Lỗi server lấy lương" });
+} catch (error) {
+    console.log("LỖI LẤY LƯƠNG:", error); 
+    return res.status(500).json({ message: "Lỗi server lấy lương" });
     }
 };
