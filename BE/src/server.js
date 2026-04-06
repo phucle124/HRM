@@ -20,7 +20,10 @@ config_ViewEngine(app); //Cố định view engine để test với EJS
 
 
 //MiddleWares
-app.use(cors());
+app.use(cors({
+    origin: 'https://hrm-fe.42web.io', // Cổng của React
+    credentials: true                // Cho phép gửi Session/Cookie
+}));
 
 app.set('trust proxy', 1); //Giúp express tin tưởng vào proxy này
 
