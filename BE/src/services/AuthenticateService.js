@@ -8,7 +8,7 @@ const encrypt = require('bcrypt');
 const login = async (email,password) =>{
 
     const [results,fields] = await connection.query(`
-        SELECT id, role, password, is_lock FROM users WHERE email = ?  
+        SELECT id, name, role, password, is_lock FROM users WHERE email = ?  
     `,[email]);
 
     let dataUser = results[0];
