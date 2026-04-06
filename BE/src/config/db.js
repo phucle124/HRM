@@ -14,7 +14,6 @@ const connection = mysql.createPool({
     connectionLimit: 10,
     maxIdle: 10, 
     enableKeepAlive: true,
-    ssl: { rejectUnauthorized: false }
 });
 
 module.exports = connection;
