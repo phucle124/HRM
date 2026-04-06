@@ -18,16 +18,21 @@ const { validateEmail, validatePassword, validatePhone } = require('../middlewar
 const checkRole = require('../middlewares/Authorize');
 
 
-//Áp dụng middleware phân quyền cho API login,home,logout
+//Áp dụng middleware phân quyền cho API khác ngoài login,home,logout
 // router.use((req, res, next) => {
 //     if (req.path === '/login' || req.path === '/' || req.path === '/logout') return next();
 //     checkRole(req, res, next);
 // });
 
+
+
 // --- DANH SÁCH API ---
 
 // Auth API
 router.post('/login', LoginHandle);
+
+
+router.use(checkRole);
 
 // User Management (Admin)
 router.get('/users', getAllUsers); 
