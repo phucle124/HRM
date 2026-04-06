@@ -18,6 +18,7 @@ app.use(express.json());
 //Config view engine
 config_ViewEngine(app); //Cố định view engine để test với EJS
 
+app.set('trust proxy', 1); //Giúp express tin tưởng vào proxy này
 
 //MiddleWares
 app.use(cors({
@@ -26,7 +27,7 @@ app.use(cors({
 }));
 app.use(sessionConfig);
 
-app.set('trust proxy', 1); //Giúp express tin tưởng vào proxy này
+
 
 //Các Routers
 //app.use('/', webRoute);
