@@ -24,6 +24,7 @@ app.use(cors({
     origin: 'https://hrm-fe.42web.io', // Cổng của React
     credentials: true                // Cho phép gửi Session/Cookie
 }));
+app.use(sessionConfig);
 
 app.set('trust proxy', 1); //Giúp express tin tưởng vào proxy này
 
