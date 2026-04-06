@@ -1,26 +1,17 @@
 require('dotenv').config();
-
-const cors = require('cors');
-
+const cors = require('cors'); 
 const express = require('express');
 
-//Dùng EJS để test hiển thị trên giao diện(Phía BE)
+
 const webRoute = require('./routes/web');
-
-//API
 const apiRoute = require('./routes/api');
-
-const db = require('./config/db');
-
+const db = require('./config/db'); 
 const config_ViewEngine = require('./config/viewEngine');
-const {sessionConfig} = require('./config/session');
-
-//config app BackEnd
+const sessionConfig = require('./config/session');
 const app = express();
-const port = process.env.PORT;
+const port = process.env.PORT || 8888; // Thêm || 8888 để lỡ file .env lỗi nó vẫn chạy
 
-
-//Config req.body
+// --- CẤU HÌNH MIDDLEWARE ---
 app.use(express.urlencoded({extended:true}));
 app.use(express.json());
 
@@ -45,7 +36,3 @@ app.use('/', apiRoute);
 app.listen(port, () =>{
     console.log(`Server is now running on port ${port}`);
 });
-
-
-
-

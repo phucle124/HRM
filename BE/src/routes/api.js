@@ -1,5 +1,16 @@
 const express = require('express');
 const router = express.Router();
+const EmployeeController = require('../controller/EmployeeController');
+
+
+// Link lấy Profile: http://localhost:8888/api/employee/profile/4
+router.get('/employee/profile/:id', EmployeeController.getProfile);
+
+// Link Điểm danh: POST http://localhost:8888/api/employee/check-in
+router.post('/employee/check-in', EmployeeController.checkIn);
+
+// Link xem Lương: http://localhost:8888/api/employee/salary/2
+router.get('/employee/salary/:id', EmployeeController.getSalary);
 
 // 1. Khai báo các Controller
 const DepartmentController = require('../controller/DepartmentController');
@@ -11,7 +22,7 @@ const {
     createDepartment, editDepartment, deleteDepartment, getEmployeesByDepartment 
 } = require('../controller/HomeController');
 const { validateEmail, validatePassword, validatePhone } = require('../middlewares/validate');
-const checkRole = require('../middlewares/Authorizate');
+const checkRole = require('../middlewares/Authorize');
 
 
 //Áp dụng middleware phân quyền cho API login,home,logout
