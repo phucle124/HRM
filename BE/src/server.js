@@ -29,8 +29,12 @@ config_ViewEngine(app); //Cố định view engine để test với EJS
 
 
 //MiddleWares
-app.use(cors()); //dùng cho React thì mới làm việc với BE(NodeJS) đc
-app.use(sessionConfig());
+app.use(cors({
+    origin: 'https://hrm-fe.42web.io', // Cổng của React
+    credentials: true                // Cho phép gửi Session/Cookie
+}));
+
+app.set('trust proxy', 1); //Giúp express tin tưởng vào proxy này
 
 //Các Routers
 //app.use('/', webRoute);

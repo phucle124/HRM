@@ -14,7 +14,7 @@ const { validateEmail, validatePassword, validatePhone } = require('../middlewar
 const checkRole = require('../middlewares/Authorizate');
 
 
-//Áp dụng middleware phân quyền cho API login
+//Áp dụng middleware phân quyền cho API login,home,logout
 router.use((req, res, next) => {
     if (req.path === '/login' || req.path === '/' || req.path === '/logout') return next();
     checkRole(req, res, next);
