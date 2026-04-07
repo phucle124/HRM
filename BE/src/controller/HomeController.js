@@ -76,10 +76,11 @@ const LoginHandle = async (req,res) =>{
             name: dataUser.name,
             role: dataUser.role 
         };
+        
 
         return res.status(200).json({
             message: "Đăng nhập thành công",
-            data: dataUser
+            data: req.session.user
         });
 
     }
