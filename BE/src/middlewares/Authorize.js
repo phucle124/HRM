@@ -7,10 +7,10 @@ const checkRole = (req,res,next)=>{
     const url = req.originalUrl;
 
     if(url.includes('/admin/') && Role !== 'admin')
-        res.status(403).json({message: "Chỉ có admin mới có quyền truy cập"});
+        return res.status(403).json({message: "Chỉ có admin mới có quyền truy cập"});
 
     if(url.includes('/hr/') && Role !== 'hr')
-        res.status(403).json({message: "Chỉ có hr mới có truy cập"})
+        return res.status(403).json({message: "Chỉ có hr mới có truy cập"})
     
     next();
 }
