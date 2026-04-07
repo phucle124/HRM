@@ -31,7 +31,14 @@ const checkRole = require('../middlewares/Authorize');
 // Auth API
 router.post('/login', LoginHandle);
 
+// --- PUBLIC ENDPOINTS (Không cần auth) ---
+router.get('/departments', getAllDepartments);
+router.get('/departments/:id', getDepartmentById);
+router.get('/departments/:id/employees', getEmployeesByDepartment);
+router.get('/employees', HRController.getAllEmployees);
+router.get('/employees/:id', HRController.getEmployeeById);
 
+// --- PROTECTED ENDPOINTS (Cần auth) ---
 router.use(checkRole);
 
 // User Management (Admin)
@@ -42,18 +49,13 @@ router.put('/users/:id',validateEmail, validatePassword, validatePhone, editUser
 router.delete('/users/:id', deleteUser); 
 router.patch('/users/:id/lock', lockUser); 
 
-// Department Management
-router.get('/departments', getAllDepartments); 
-router.get('/departments/:id', getDepartmentById);
+// Department Management (Protected write)
 router.post('/departments', createDepartment);
 router.put('/departments/:id', editDepartment);
 router.delete('/departments/:id', deleteDepartment);
-router.get('/departments/:id/employees', getEmployeesByDepartment);
 
-// Employee Management (HR)
-router.get('/employees', HRController.getAllEmployees);
+// Employee Management (Protected write)
 router.post('/employees', HRController.createEmployee);
-router.get('/employees/:id', HRController.getEmployeeById);
 router.put('/employees/:id', HRController.updateEmployee);
 router.delete('/employees/:id', HRController.deleteEmployee);
 
