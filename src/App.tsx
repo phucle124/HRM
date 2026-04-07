@@ -25,9 +25,6 @@ import AdminDashboardPage from './pages/ADMIN/AdminDashboardPage';
 import EmployeesADPage from './pages/ADMIN/EmployeesADPage';
 import DepartmentsADPage from './pages/ADMIN/DepartmentsADPage';
 import AttendanceADPage from './pages/ADMIN/AttendanceADPage';
-import SalaryADPage from './pages/ADMIN/SalaryADPage';
-import LeaveADPage from './pages/ADMIN/LeavesADPage';
-import ContractsADPage from './pages/ADMIN/ContractsADPage';
 import RewardsADPage from './pages/ADMIN/RewardsADPage';
 import ReportsADPage from './pages/ADMIN/ReportsADPage';
 import SettingsADPage from './pages/ADMIN/SettingsADPage';
@@ -79,9 +76,6 @@ export default function App() {
         <Route path="/admin/employees" element={<EmployeesADPage />} />
         <Route path="/admin/departments" element={<DepartmentsADPage />} />
         <Route path="/admin/attendance" element={<AttendanceADPage />} />
-        <Route path="/admin/salary" element={<SalaryADPage />} />
-        <Route path="/admin/leave" element={<LeaveADPage />} />
-        <Route path="/admin/contracts" element={<ContractsADPage />} />
         <Route path="/admin/rewards" element={<RewardsADPage />} />
         <Route path="/admin/reports" element={<ReportsADPage />} />
         <Route path="/admin/settings" element={<SettingsADPage />} />

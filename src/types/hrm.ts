@@ -1,5 +1,11 @@
 export type Role = 'admin' | 'manager' | 'hr' | 'employee';
 
+export interface AuthUser {
+  id: number;
+  name: string;
+  email: string;
+  role: Role;
+}
 export interface Employee {
   id: number;
   code: string;
@@ -25,6 +31,7 @@ export interface Department {
   id: number;
   name: string;
   manager: string;
+  managerId?: number;
   totalEmployees: number;
   openPositions: number;
   budget: string;

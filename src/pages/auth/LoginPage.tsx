@@ -9,61 +9,59 @@ export default function LoginPage() {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
 
-  const handleLogin = () => {
-    setError('');
+  const handleLogin = async () => {
+  setError('');
+  setLoading(true);
 
-    if (username === 'admin' && password === '123456') {
-      login({
-        name: 'Admin',
-        email: 'admin@gmail.com',
-        role: 'admin',
-      });
-      navigate('/admin/dashboard');
+  try {
+    const response = await fetch('https://hrm-phkz.onrender.com/login', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      credentials: 'include',
+      body: JSON.stringify({
+        email: username,
+        password: password,
+      }),
+    });
+
+   const data = await response.json();
+
+    if (!response.ok) {
+      setError(data.message || 'Sai tài khoản hoặc mật khẩu');
+      setLoading(false);
       return;
     }
 
-    if (username === 'hr' && password === '123456') {
-      login({
-        name: 'HR',
-        email: 'hr@gmail.com',
-        role: 'hr',
-      });
-      navigate('/hr');
-      return;
-    }
+    login({
+      id: data.data.id,
+      name: data.data.name,
+      email: username,
+      role: data.data.role,
+      token: data.token || data.data.token, // Kiểm tra xem server trả về token ở đâu thì lấy ở đó
+    });
 
-    if (username === 'manager' && password === '123456') {
-      login({
-        name: 'Manager',
-        email: 'manager@gmail.com',
-        role: 'manager',
-      });
-      navigate('/manager/dashboard');
-      return;
-    }
+    if (data.data.role === 'admin') navigate('/admin/dashboard');
+    else if (data.data.role === 'hr') navigate('/hr');
+    else if (data.data.role === 'manager') navigate('/manager/dashboard');
+    else navigate('/employee');
 
-    if (username === 'employee' && password === '123456') {
-      login({
-        name: 'Employee',
-        email: 'employee@gmail.com',
-        role: 'employee',
-      });
-      navigate('/employee');
-      return;
-    }
+  } catch (err) {
+    setError('Không kết nối được server');
+  }
 
-    setError('Sai tên đăng nhập hoặc mật khẩu');
-  };
+  setLoading(false);
+};
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-[#f8f5f1] px-4">
       <div className="w-full max-w-lg bg-white rounded-[30px] shadow-xl p-10 border border-gray-200">
 
         <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold text-gray-900">
-            Đăng nhập hệ thống
-          </h1>
+          <h1 className="text-3xl font-bold text-gray-900">Đăng nhập hệ thống</h1>
           <p className="text-sm text-gray-500 mt-2">
             Truy cập hệ thống quản lý nhân sự theo đúng vai trò
           </p>
@@ -79,7 +77,7 @@ export default function LoginPage() {
 
           <div>
             <label className="block text-sm font-semibold text-gray-700 mb-2">
-              Tên đăng nhập
+              Email
             </label>
             <input
               type="text"
@@ -103,24 +101,15 @@ export default function LoginPage() {
 
           <button
             onClick={handleLogin}
+            disabled={loading}
             className="w-full bg-blue-600 text-white py-3 rounded-2xl font-semibold hover:bg-blue-700 transition"
           >
-            Đăng nhập
+            {loading ? 'Đang đăng nhập...' : 'Đăng nhập'}
           </button>
         </div>
 
-        <div className="mt-6 rounded-2xl bg-[#f7f2ec] p-5 text-sm text-gray-600">
-          <p className="font-semibold text-gray-800 mb-2">
-            Tài khoản dùng thử
-          </p>
-          <p>Admin: admin / 123456</p>
-          <p>HR: hr / 123456</p>
-          <p>Manager: manager / 123456</p>
-          <p>Employee: employee / 123456</p>
-        </div>
-
         <p className="mt-5 text-center text-sm text-gray-500">
-          Liên hệ bộ phận HR nếu cần hỗ trợ tài khoản
+          Đăng nhập bằng tài khoản có trong database
         </p>
       </div>
     </div>

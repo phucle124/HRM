@@ -11,12 +11,9 @@ import type {
 
 export const adminNavItems: NavItem[] = [
   { label: 'Dashboard', path: '/admin/dashboard', icon: 'layout-dashboard' },
-  { label: 'Nhân viên', path: '/admin/employees', icon: 'users' },
   { label: 'Phòng ban', path: '/admin/departments', icon: 'building-2' },
+  { label: 'Nhân viên', path: '/admin/employees', icon: 'users' },
   { label: 'Chấm công', path: '/admin/attendance', icon: 'calendar-days' },
-  { label: 'Lương', path: '/admin/salary', icon: 'wallet' },
-  { label: 'Nghỉ phép', path: '/admin/leave', icon: 'plane' },
-  { label: 'Hợp đồng', path: '/admin/contracts', icon: 'file-text' },
   { label: 'Khen thưởng', path: '/admin/rewards', icon: 'award' },
   { label: 'Báo cáo', path: '/admin/reports', icon: 'bar-chart-3' },
   { label: 'Cài đặt', path: '/admin/settings', icon: 'settings' },

@@ -1,143 +1,174 @@
-import React, { useMemo, useState } from 'react';
-import { useAppData } from '../../context/dataContext';
-import type { Employee } from '../../types/hrm';
+import React, { useEffect, useMemo, useState } from 'react';
+import { useAuth } from '../../context/authContext';
+
+// Định nghĩa interface khớp với dữ liệu API mới
+interface Employee {
+  id: number;
+  name: string;
+  email: string;
+  department_name: string;
+  // Các trường dưới đây có thể bổ sung nếu API trả về thêm
+  position?: string;
+  phone?: string;
+  status?: string;
+}
+
+const BASE_URL = 'https://hrm-phkz.onrender.com';
 
 export default function EmployeesADPage() {
-  const { employees } = useAppData();
-
+  const { user } = useAuth();
+  const [employees, setEmployees] = useState<Employee[]>([]);
   const [search, setSearch] = useState('');
   const [departmentFilter, setDepartmentFilter] = useState('');
   const [selectedEmployee, setSelectedEmployee] = useState<Employee | null>(null);
+  const [loading, setLoading] = useState(true);
 
+  // Load danh sách nhân viên
+  useEffect(() => {
+    const fetchEmployees = async () => {
+      setLoading(true);
+      try {
+        const res = await fetch(`${BASE_URL}/employees`, {
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${user?.token || ''}`,
+          },
+        });
+
+        if (!res.ok) {
+          throw new Error('Không thể tải dữ liệu');
+        }
+
+        const result = await res.json();
+        // Truy cập vào result.data theo cấu trúc JSON bạn cung cấp
+        setEmployees(Array.isArray(result.data) ? result.data : []);
+      } catch (err) {
+        console.error('Lỗi load nhân viên:', err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchEmployees();
+  }, [user]);
+
+  // Filter nhân viên theo search (tên) và department_name
   const filteredEmployees = useMemo(() => {
     return employees.filter((emp) => {
-      const matchesSearch =
-        emp.fullName.toLowerCase().includes(search.toLowerCase()) ||
-        emp.code.toLowerCase().includes(search.toLowerCase());
-
-      const matchesDepartment =
-        departmentFilter === '' || emp.department === departmentFilter;
-
+      const matchesSearch = emp.name?.toLowerCase().includes(search.toLowerCase());
+      const matchesDepartment = 
+        departmentFilter === '' || emp.department_name === departmentFilter;
       return matchesSearch && matchesDepartment;
     });
   }, [employees, search, departmentFilter]);
 
   return (
-    <div className="flex gap-6">
-      {/* LEFT TABLE */}
+    <div className="flex gap-6 p-4">
+      {/* Danh sách nhân viên */}
       <div className="flex-1 bg-white rounded-xl shadow p-4">
         <div className="flex gap-3 mb-4">
           <input
             type="text"
-            placeholder="Tìm theo tên hoặc mã"
-            className="border rounded px-3 py-2 w-64"
+            placeholder="Tìm theo tên..."
+            className="border rounded-lg px-3 py-2 w-64 focus:outline-none focus:ring-2 focus:ring-blue-400"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
           />
-
+          
           <select
-            className="border rounded px-3 py-2"
+            className="border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400"
             value={departmentFilter}
             onChange={(e) => setDepartmentFilter(e.target.value)}
           >
             <option value="">Tất cả phòng ban</option>
-            {[...new Set(employees.map((e) => e.department))].map((dep) => (
-              <option key={dep} value={dep}>
+            {[...new Set(employees.map((e) => e.department_name).filter(Boolean))].map((dep, idx) => (
+              <option key={idx} value={dep}>
                 {dep}
               </option>
             ))}
           </select>
-
-          <button className="bg-blue-600 text-white px-4 py-2 rounded">
-            Thêm
-          </button>
         </div>
 
         <div className="overflow-hidden rounded-2xl border border-gray-100 shadow-sm">
-          <table className="w-full">
+          <table className="w-full text-left">
             <thead className="bg-gray-50">
-              <tr className="text-center text-gray-600 text-sm">
-                <th className="px-4 py-3 font-medium">Mã NV</th>
-                <th className="px-4 py-3 font-medium">Họ tên</th>
-                <th className="px-4 py-3 font-medium">Phòng ban</th>
-                <th className="px-4 py-3 font-medium">Chức vụ</th>
-                <th className="px-4 py-3 font-medium">Trạng thái</th>
-                <th className="px-4 py-3 font-medium w-[160px]">Thao tác</th>
+              <tr className="text-gray-600 text-sm border-b">
+                <th className="px-6 py-4 font-semibold">ID</th>
+                <th className="px-6 py-4 font-semibold">Họ tên</th>
+                <th className="px-6 py-4 font-semibold">Phòng ban</th>
+                <th className="px-6 py-4 font-semibold">Email</th>
               </tr>
             </thead>
-
             <tbody>
-              {filteredEmployees.map((emp) => (
-                <tr
-                  key={emp.id}
-                  className="text-center border-t border-gray-100 hover:bg-gray-50 transition"
-                >
-                  <td className="px-4 py-3">{emp.code}</td>
-
-                  <td
-                    className="px-4 py-3 text-blue-600 cursor-pointer font-medium"
+              {loading ? (
+                <tr>
+                  <td colSpan={4} className="text-center py-10 text-gray-400">Đang tải dữ liệu...</td>
+                </tr>
+              ) : filteredEmployees.length > 0 ? (
+                filteredEmployees.map((emp) => (
+                  <tr
+                    key={emp.id}
+                    className="border-t border-gray-100 hover:bg-blue-50/50 transition cursor-pointer"
                     onClick={() => setSelectedEmployee(emp)}
                   >
-                    {emp.fullName}
-                  </td>
-
-                  <td className="px-4 py-3">{emp.department}</td>
-                  <td className="px-4 py-3">{emp.position}</td>
-                  <td className="px-4 py-3">{emp.status}</td>
-
-                  <td className="px-4 py-3 w-[160px]">
-                    <div className="flex justify-center gap-3">
-                      <button className="text-blue-600 hover:underline">Sửa</button>
-                      <button className="text-red-500 hover:underline">Xóa</button>
-                    </div>
-                  </td>
+                    <td className="px-6 py-4 text-gray-500">#{emp.id}</td>
+                    <td className="px-6 py-4 text-blue-600 font-medium">
+                      {emp.name}
+                    </td>
+                    <td className="px-6 py-4">
+                      <span className="px-3 py-1 bg-gray-100 rounded-full text-xs text-gray-600">
+                        {emp.department_name}
+                      </span>
+                    </td>
+                    <td className="px-6 py-4 text-gray-500 italic">{emp.email || 'Chưa cập nhật'}</td>
+                  </tr>
+                ))
+              ) : (
+                <tr>
+                  <td colSpan={4} className="text-center py-10 text-gray-400">Không tìm thấy nhân viên nào</td>
                 </tr>
-              ))}
+              )}
             </tbody>
           </table>
         </div>
       </div>
 
-      {/* RIGHT DETAIL PANEL */}
+      {/* Chi tiết nhân viên (Side Panel) */}
       {selectedEmployee && (
-        <div className="w-80 bg-white rounded-xl shadow p-4">
-          <h2 className="text-lg font-semibold mb-4">Chi tiết nhân viên</h2>
-
-          <div className="space-y-2 text-sm">
-            <p>
-              <strong>Họ tên:</strong> {selectedEmployee.fullName}
-            </p>
-            <p>
-              <strong>Mã NV:</strong> {selectedEmployee.code}
-            </p>
-            <p>
-              <strong>Phòng ban:</strong> {selectedEmployee.department}
-            </p>
-            <p>
-              <strong>Chức vụ:</strong> {selectedEmployee.position}
-            </p>
-            <p>
-              <strong>Email:</strong> {selectedEmployee.email}
-            </p>
-            <p>
-              <strong>SĐT:</strong> {selectedEmployee.phone}
-            </p>
-            <p>
-              <strong>Ngày vào làm:</strong> {selectedEmployee.joinDate}
-            </p>
-            <p>
-              <strong>Địa điểm:</strong> {selectedEmployee.location}
-            </p>
-            <p>
-              <strong>Trạng thái:</strong> {selectedEmployee.status}
-            </p>
+        <div className="w-80 bg-white rounded-xl shadow-lg p-6 border-t-4 border-blue-500 animate-in fade-in slide-in-from-right-4 duration-200">
+          <div className="flex justify-between items-center mb-6">
+            <h2 className="text-xl font-bold text-gray-800">Thông tin chi tiết</h2>
+            <button 
+              className="text-gray-400 hover:text-gray-600"
+              onClick={() => setSelectedEmployee(null)}
+            >
+              ✕
+            </button>
           </div>
-
+          
+          <div className="space-y-4 text-sm">
+            <div>
+              <label className="text-gray-400 block">Họ và tên</label>
+              <p className="text-base font-semibold text-gray-900">{selectedEmployee.name}</p>
+            </div>
+            <div>
+              <label className="text-gray-400 block">Phòng ban</label>
+              <p className="text-base text-gray-900">{selectedEmployee.department_name}</p>
+            </div>
+            <div>
+              <label className="text-gray-400 block">Email hệ thống</label>
+              <p className="text-base text-gray-900 truncate">{selectedEmployee.email || 'N/A'}</p>
+            </div>
+            <div className="pt-4 border-t border-gray-100">
+              <p className="text-xs text-gray-400 italic">* Dữ liệu được lấy trực tiếp từ hệ thống HRM</p>
+            </div>
+          </div>
+          
           <button
-            className="mt-4 text-red-500"
+            className="mt-8 w-full py-2 bg-gray-100 text-gray-600 rounded-lg hover:bg-gray-200 transition"
             onClick={() => setSelectedEmployee(null)}
           >
-            Đóng
+            Đóng bảng tin
           </button>
         </div>
       )}
