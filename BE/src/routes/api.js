@@ -12,7 +12,8 @@ const ManagerController = require('../controller/ManagerController'); // Đã g�
 const { 
     getAllUsers, getUserById, deleteUser, editUser, createUser, 
     LoginHandle, lockUser, getAllDepartments, getDepartmentById, 
-    createDepartment, editDepartment, deleteDepartment, getEmployeesByDepartment 
+    createDepartment, editDepartment, deleteDepartment, getEmployeesByDepartment, 
+    SessionContain
 } = require('../controller/HomeController');
 const { validateEmail, validatePassword, validatePhone } = require('../middlewares/validate');
 const checkRole = require('../middlewares/Authorize');
@@ -30,6 +31,7 @@ const checkRole = require('../middlewares/Authorize');
 
 // Auth API
 router.post('/login', LoginHandle);
+router.get('/session',checkRole, SessionContain);
 
 // --- PUBLIC ENDPOINTS (Không cần auth) ---
 router.get('/departments', getAllDepartments);

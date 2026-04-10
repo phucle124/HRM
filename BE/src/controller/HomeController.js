@@ -111,7 +111,13 @@ const LoginHandle = async (req,res) =>{
     //     return res.render('NotFound');
 }
 
-  
+const SessionContain = (req,res)=>{
+    const id = req.session.user.id;
+    const name = req.session.user.name;
+    const role = req.session.user.role;
+
+    return res.status(200).json({id,name,role});
+} 
 
 
 const createUser = async(req,res)=>{
@@ -391,6 +397,8 @@ module.exports = {
     LoginPage,
     LoginHandle,
     Logout,
+
+    SessionContain,
 
     admin_index,
 
