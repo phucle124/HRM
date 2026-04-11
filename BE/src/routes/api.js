@@ -78,4 +78,7 @@ router.post('/employee/check-in', EmployeeController.checkIn);
 // Link xem Lương: http://localhost:8888/api/employee/salary/2
 router.get('/employee/salary/:id', EmployeeController.getSalary);
 
+// Gán tài khoản cho nhân viên và gửi mail thông báo
+router.patch('/employees/:id/assign-user', HRController.assignUserAccount);
+
 module.exports = router;
