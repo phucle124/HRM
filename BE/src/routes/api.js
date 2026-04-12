@@ -18,6 +18,7 @@ const {
 } = require('../controller/HomeController');
 const { validateEmail, validatePassword, validatePhone } = require('../middlewares/validate');
 const checkRole = require('../middlewares/Authorize');
+const { Assign_Manager } = require('../services/CRUDService');
 
 
 //Áp dụng middleware phân quyền cho API khác ngoài login,home,logout
@@ -57,6 +58,7 @@ router.patch('/users/:id/lock', lockUser);
 router.post('/departments', createDepartment);
 router.put('/departments/:id', editDepartment);
 router.delete('/departments/:id', deleteDepartment);
+router.patch('/manager/:departmentId/assign', Assign_Manager)
 
 // Employee Management (Protected write)
 router.post('/employees', HRController.createEmployee);
