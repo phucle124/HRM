@@ -1,9 +1,8 @@
 
 const {login} = require('../services/AuthenticateService');
-const CRUDService = require('../services/CRUDService'); 
 
 
-const {AllUsersData ,UserByIdData, CreateUser, UpdateUser, DeleteUser, LockUser, AllDepartmentsData, DepartmentByIdData, EditDepartment, DeleteDepartment, CreateDepartment, EmployeeByIdData, Employees_ByDepartmentId, Manager_BydepartmentId, Manager_ByDepartmentId} = require('../services/CRUDService')
+const {AllUsersData ,UserByIdData, CreateUser, UpdateUser, DeleteUser, LockUser, AllDepartmentsData, DepartmentByIdData, EditDepartment, DeleteDepartment, CreateDepartment, EmployeeByIdData, Employees_ByDepartmentId, Manager_BydepartmentId, Manager_ByDepartmentId, Assign_Manager} = require('../services/CRUDService')
 
 
 
@@ -250,6 +249,7 @@ const lockUser = async (req,res)=>{
     }
 }
 
+
 const getAllDepartments = async(req,res)=>{
     let dataDept = await AllDepartmentsData();
 
@@ -390,9 +390,31 @@ const getEmployeesByDepartment = async (req, res) => {
     }
 };
 
+
+const assignManager = async(req,res)=>{
+    const DepartmentId = req.params.departmentId;
+    const EmployeeId = req.body.employeeId;
+
+    try {
+        const dataAssignManager = await Assign_Manager(DepartmentId,EmployeeId);
+
+        return res.status(200).json({
+            message: "Đã gán trưởng phòng thành công",
+            data: dataAssignManager
+        });
+
+    } catch (err) {
+        return res.status(500).json({
+            message: err.message
+        });
+    }
+}
+
 const getAllAttendances = async (req,res) =>{
     res.status(200).json(await CRUDService.AllAttendancesData());
 };
+
+
 
 module.exports = {
     getAllUsers,
