@@ -1,5 +1,5 @@
 const nodemailer = require('nodemailer');
-
+require('dotenv').config();
 
 // Đổi tên hàm thành sendAccountEmail cho khớp với code của Trí để ông ấy dễ gọi
 const sendAccountEmail = async (toEmail, employeeName, accountInfo) => {

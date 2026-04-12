@@ -448,6 +448,8 @@ module.exports = {
     editDepartmentPage,
     editDepartment,
 
-    deleteDepartment
+    deleteDepartment,
+
+    assignManager
 
 }
