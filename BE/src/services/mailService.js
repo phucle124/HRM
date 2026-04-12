@@ -1,5 +1,5 @@
 const nodemailer = require('nodemailer');
-require('dotenv').config();
+
 
 // Đổi tên hàm thành sendAccountEmail cho khớp với code của Trí để ông ấy dễ gọi
 const sendAccountEmail = async (toEmail, employeeName, accountInfo) => {
@@ -12,7 +12,7 @@ const sendAccountEmail = async (toEmail, employeeName, accountInfo) => {
             pass: 'jkznnknxdpnbrhty'            // Mã App Password ông vừa lấy
         },
     tls: {
-        rejectUnauthorized: false
+        rejectUnauthorized: true
     }
 });
 
@@ -29,7 +29,7 @@ const sendAccountEmail = async (toEmail, employeeName, accountInfo) => {
                 <table style="border-collapse: collapse; width: 100%; max-width: 400px;">
                     <tr>
                         <td style="padding: 10px; border: 1px solid #ddd; background-color: #f9f9f9;"><strong>Tên đăng nhập:</strong></td>
-                        <td style="padding: 10px; border: 1px solid #ddd;">${accountInfo.username}</td>
+                        <td style="padding: 10px; border: 1px solid #ddd;">${accountInfo.email}</td>
                     </tr>
                     <tr>
                         <td style="padding: 10px; border: 1px solid #ddd; background-color: #f9f9f9;"><strong>Mật khẩu:</strong></td>
