@@ -13,7 +13,8 @@ const {
     getAllUsers, getUserById, deleteUser, editUser, createUser, 
     LoginHandle, lockUser, getAllDepartments, getDepartmentById, 
     createDepartment, editDepartment, deleteDepartment, getEmployeesByDepartment, 
-    SessionContain
+    SessionContain,
+    getAllAttendances
 } = require('../controller/HomeController');
 const { validateEmail, validatePassword, validatePhone } = require('../middlewares/validate');
 const checkRole = require('../middlewares/Authorize');
