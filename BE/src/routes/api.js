@@ -14,7 +14,8 @@ const {
     LoginHandle, lockUser, getAllDepartments, getDepartmentById, 
     createDepartment, editDepartment, deleteDepartment, getEmployeesByDepartment, 
     SessionContain,
-    getAllAttendances
+    getAllAttendances,
+    assignManager
 } = require('../controller/HomeController');
 const { validateEmail, validatePassword, validatePhone } = require('../middlewares/validate');
 const checkRole = require('../middlewares/Authorize');
@@ -58,7 +59,7 @@ router.patch('/users/:id/lock', lockUser);
 router.post('/departments', createDepartment);
 router.put('/departments/:id', editDepartment);
 router.delete('/departments/:id', deleteDepartment);
-router.patch('/manager/:departmentId/assign', Assign_Manager)
+router.patch('/manager/:departmentId/assign', assignManager)
 
 // Employee Management (Protected write)
 router.post('/employees', HRController.createEmployee);
