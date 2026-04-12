@@ -1,8 +1,17 @@
+const redis = require('redis')
 const connection = require('../config/db');
 //Tầng DAO
 
 const AllUsersData = async ()=>{
-    const [results,fields] = await connection.query('SELECT id, name, email, password, phone, role, is_lock FROM users');
+
+    const cache = await redis.get('all_users');
+
+    if(cache) return JSON.parse(cache);
+
+    const [results,fields] = await connection.query('SELECT * FROM users');
+    
+    await redis.setex('all_users',3600, JSON.stringify(results));
+    
     return results;
 }
 
