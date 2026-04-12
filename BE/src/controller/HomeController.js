@@ -390,6 +390,10 @@ const getEmployeesByDepartment = async (req, res) => {
     }
 };
 
+const getAllAttendances = async (req,res) =>{
+    res.status(200).json(await CRUDService.AllAttendancesData());
+};
+
 module.exports = {
     getAllUsers,
     getUserById,
@@ -414,6 +418,7 @@ module.exports = {
     getAllDepartments,
     getDepartmentById,
     getEmployeesByDepartment,
+    getAllAttendances,
 
     createDepartmentPage,
     createDepartment,

@@ -47,6 +47,17 @@ const AllManagersData = async () => {
     return results;
 }
 
+const AllAttendancesData = async()=>{
+    const cacheKey = 'attendances:all';
+    const cached = await redisClient.get(cacheKey);
+    if(cached) return JSON.parse(cached);
+
+    const [results] = await connection.query(`
+        SELECT * FROM attendance
+    `);
+    await redisClient.setEx(cacheKey, 3600, JSON.stringify(results));
+}
+
 const Employees_ByDepartmentId = async (departmentId) => {
     const cacheKey = `employees:dept:${departmentId}`;
     const cached = await redisClient.get(cacheKey);
@@ -143,6 +154,8 @@ const Manager_ByDepartmentId = async (departmentId) => {
 module.exports = {
     AllUsersData, UserByIdData, CreateUser, UpdateUser, DeleteUser, LockUser,
     AllDepartmentsData, DepartmentByIdData, CreateDepartment, DeleteDepartment, EditDepartment,
+    AllAttendancesData,
     AllEmployeesData, EmployeeByIdData, Assign_Manager, AllManagersData,
     Manager_ByDepartmentId, Employees_ByDepartmentId,
+    
 }
