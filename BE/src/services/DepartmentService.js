@@ -1,7 +1,12 @@
 const connection = require('../config/db');
+const redisClient = require('../config/redis'); // Thêm kết nối Redis
 
-// Lấy danh sách tất cả phòng ban kèm tên trưởng phòng
+// 1. Lấy danh sách tất cả phòng ban kèm tên trưởng phòng (ƯU TIÊN CAO)
 const getAllDepartments = async () => {
+    const cacheKey = 'depts:all_full';
+    const cached = await redisClient.get(cacheKey);
+    if (cached) return JSON.parse(cached);
+
     const [results] = await connection.query(`
         SELECT 
             d.department_id, 
@@ -10,43 +15,51 @@ const getAllDepartments = async () => {
         FROM departments d
         LEFT JOIN employees e ON d.manager_id = e.employee_id
     `);
+
+    await redisClient.setEx(cacheKey, 3600, JSON.stringify(results));
     return results;
 };
 
-// Lấy thông tin một phòng ban bằng ID
-const getDepartmentById = async (id) => {
-    const [results] = await connection.query('SELECT * FROM departments WHERE department_id = ?', [id]);
-    return results[0];
-};
+// 2. Lấy danh sách nhân viên theo phòng ban (ƯU TIÊN CAO)
+const getEmployeesByDepartmentId = async (departmentId) => {
+    const cacheKey = `depts:employees:${departmentId}`;
+    const cached = await redisClient.get(cacheKey);
+    if (cached) return JSON.parse(cached);
 
-// Lấy tất cả nhân viên để hiển thị trong dropdown
-const getAllEmployeesForDropdown = async () => {
-    const [results] = await connection.query('SELECT employee_id, full_name FROM employees');
+    const [results] = await connection.query(
+        'SELECT employee_id, full_name, email, position FROM employees WHERE department_id = ?',
+        [departmentId]
+    );
+
+    await redisClient.setEx(cacheKey, 3600, JSON.stringify(results));
     return results;
 };
 
-// Tạo phòng ban mới
+// 3. Tạo phòng ban mới (Xóa cache list)
 const createDepartment = async (name, manager_id) => {
-    // manager_id có thể là null nếu không chọn
     const [results] = await connection.query(
         'INSERT INTO departments (name, manager_id) VALUES (?, ?)',
         [name, manager_id || null]
     );
+    
+    // Khi thêm mới, danh sách tổng đã thay đổi -> Xóa cache
+    await redisClient.del('depts:all_full');
     return results;
 };
 
-// Cập nhật phòng ban
+// 4. Cập nhật phòng ban (Xóa cache list)
 const updateDepartment = async (id, name, manager_id) => {
     const [results] = await connection.query(
         'UPDATE departments SET name = ?, manager_id = ? WHERE department_id = ?',
         [name, manager_id || null, id]
     );
+    
+    await redisClient.del('depts:all_full');
     return results;
 };
 
-// Xóa phòng ban (có kiểm tra nghiệp vụ)
+// 5. Xóa phòng ban (Xóa cache list)
 const deleteDepartment = async (id) => {
-    // 1. Kiểm tra xem còn nhân viên nào trong phòng ban không
     const [countResult] = await connection.query(
         'SELECT COUNT(*) as employee_count FROM employees WHERE department_id = ?',
         [id]
@@ -54,24 +67,26 @@ const deleteDepartment = async (id) => {
     const employeeCount = countResult[0].employee_count;
 
     if (employeeCount > 0) {
-        // Nếu còn, ném ra lỗi để Controller bắt và xử lý
         throw new Error(`Không thể xóa phòng ban vì vẫn còn ${employeeCount} nhân viên.`);
     }
 
-    // 2. Nếu không còn nhân viên, tiến hành xóa
     const [deleteResult] = await connection.query('DELETE FROM departments WHERE department_id = ?', [id]);
+    
+    // Xóa thành công thì dọn dẹp cache
+    await redisClient.del('depts:all_full');
     return deleteResult;
 };
 
-// Lấy danh sách nhân viên theo phòng ban
-const getEmployeesByDepartmentId = async (departmentId) => {
-    const [results] = await connection.query(
-        'SELECT employee_id, full_name, email, position FROM employees WHERE department_id = ?',
-        [departmentId]
-    );
-    return results;
+
+const getDepartmentById = async (id) => {
+    const [results] = await connection.query('SELECT * FROM departments WHERE department_id = ?', [id]);
+    return results[0];
 };
 
+const getAllEmployeesForDropdown = async () => {
+    const [results] = await connection.query('SELECT employee_id, full_name FROM employees');
+    return results;
+};
 
 module.exports = {
     getAllDepartments,
