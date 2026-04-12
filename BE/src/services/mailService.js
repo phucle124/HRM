@@ -30,11 +30,11 @@ const sendAccountEmail = async (toEmail, employeeName, accountInfo) => {
                 <table style="border-collapse: collapse; width: 100%; max-width: 400px;">
                     <tr>
                         <td style="padding: 10px; border: 1px solid #ddd; background-color: #f9f9f9;"><strong>Tên đăng nhập:</strong></td>
-                        <td style="padding: 10px; border: 1px solid #ddd;">${accountInfo.email}</td>
+                        <td style="padding: 10px; border: 1px solid #ddd;">${accountInfo.userEmail}</td>
                     </tr>
                     <tr>
                         <td style="padding: 10px; border: 1px solid #ddd; background-color: #f9f9f9;"><strong>Mật khẩu:</strong></td>
-                        <td style="padding: 10px; border: 1px solid #ddd;">${accountInfo.password}</td>
+                        <td style="padding: 10px; border: 1px solid #ddd;">${accountInfo.userPassword}</td>
                     </tr>
                 </table>
                 <p style="color: red;"><i>Lưu ý: Vui lòng đổi mật khẩu trong lần đầu đăng nhập.</i></p>

@@ -77,10 +77,10 @@ const deleteEmployee = async (req, res) => {
 
 const assignUserAccount = async (req, res) => {
     const employeeId = req.params.id;
-    const { userId, email, password } = req.body;
+    const { userId, userEmail, userPassword } = req.body;
 
     // Kiểm tra dữ liệu đầu vào
-    if (!userId || !email || !password) {
+    if (!userId || !userEmail || !userPassword) {
         return res.status(400).json({ message: 'Vui lòng cung cấp đủ userId, email và password.' });
     }
 
@@ -115,7 +115,7 @@ const assignUserAccount = async (req, res) => {
 
         // Bước 3: Gọi service để gửi email
         try {
-            await sendAccountEmail(email, full_name, { email, password });
+            await sendAccountEmail(email, full_name, { userEmail, userPassword });
         } catch (mailError) {
             // Nếu gửi mail lỗi, vẫn coi như thành công ở phía gán user
             // nhưng trả về mã 207 để client biết có một phần không hoàn thành.
