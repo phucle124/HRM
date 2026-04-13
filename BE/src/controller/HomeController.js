@@ -111,9 +111,18 @@ const LoginHandle = async (req,res) =>{
 }
 
 const SessionContain = (req,res)=>{
+
+    if (!req.session || !req.session.user) {
+        return res.status(401).json({ message: "Chưa đăng nhập" });
+    }
+
+    console.log("SESSION:", req.session);
+
     const id = req.session.user.id;
     const name = req.session.user.name;
     const role = req.session.user.role;
+
+    
 
     return res.status(200).json({id,name,role});
 } 
