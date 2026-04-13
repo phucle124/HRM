@@ -16,11 +16,16 @@ const checkRole = (req,res,next)=>{
 };
 
 const checkRole2 = (allowedRoles) => {
-    return (req,res,next) =>{
+    return (req, res, next) => {
 
-        if(!allowedRoles.includes(req.session.user.role)){
-            return res.status(403).json({message: "Không có quyền"})
+        if (!req.session || !req.session.user) {
+            return res.status(401).json({ message: "Chưa đăng nhập" });
         }
+
+        if (!allowedRoles.includes(req.session.user.role)) {
+            return res.status(403).json({ message: "Không có quyền" });
+        }
+
         next();
     };
 };
