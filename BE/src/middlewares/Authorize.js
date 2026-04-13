@@ -13,6 +13,17 @@ const checkRole = (req,res,next)=>{
         return res.status(403).json({message: "Chỉ có hr mới có truy cập"})
     
     next();
-}
+};
 
-module.exports = checkRole;
+const checkRole2 = (allowedRoles) => {
+    return (req,res,next) =>{
+        const User = req.session.user;
+
+        if(!allowedRoles.includes(User.role)){
+            return res.status(403).json({message: "Không có quyền"})
+        }
+        next();
+    };
+};
+
+module.exports = checkRole2;

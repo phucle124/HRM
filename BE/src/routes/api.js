@@ -1,11 +1,6 @@
 const express = require('express');
 const router = express.Router();
 const EmployeeController = require('../controller/EmployeeController');
-
-
-
-
-// 1. Khai báo các Controller
 const DepartmentController = require('../controller/DepartmentController');
 const HRController = require('../controller/HRController');
 const ManagerController = require('../controller/ManagerController'); // Đã gộp lại một chỗ
@@ -20,6 +15,7 @@ const {
 const { validateEmail, validatePassword, validatePhone } = require('../middlewares/validate');
 const checkRole = require('../middlewares/Authorize');
 const { Assign_Manager } = require('../services/CRUDService');
+const checkRole2 = require('../middlewares/Authorize');
 
 
 //Áp dụng middleware phân quyền cho API khác ngoài login,home,logout
@@ -47,23 +43,23 @@ router.get('/attendance', getAllAttendances);
 // --- PROTECTED ENDPOINTS (Cần auth) ---
 //router.use(checkRole);
 
-// User Management (Admin)
-router.get('/users', getAllUsers); 
-router.get('/users/:id', getUserById); 
-router.post('/users', validateEmail, validatePassword, validatePhone,createUser); 
-router.put('/users/:id',validateEmail, validatePassword, validatePhone, editUser);
-router.delete('/users/:id', deleteUser); 
-router.patch('/users/:id/lock', lockUser); 
+// User Management (Admin - Cần auth)
+router.get('/users', checkRole2(["admin"]) ,getAllUsers); 
+router.get('/users/:id', checkRole2(["admin"]),getUserById); 
+router.post('/users', checkRole2(["admin"]), validateEmail, validatePassword, validatePhone, createUser); 
+router.put('/users/:id', checkRole2(["admin"]), validateEmail, validatePassword, validatePhone, editUser);
+router.delete('/users/:id', checkRole2(["admin"]), deleteUser); 
+router.patch('/users/:id/lock', checkRole2(["admin"]),lockUser); 
 
-// Department Management (Protected write)
-router.post('/departments', createDepartment);
-router.put('/departments/:id', editDepartment);
-router.delete('/departments/:id', deleteDepartment);
-router.patch('/manager/:departmentId/assign', assignManager)
+// Department Management (Admin - Cần auth)
+router.post('/departments', checkRole2(["admin"]),createDepartment);
+router.put('/departments/:id', checkRole2(["admin"]), editDepartment);
+router.delete('/departments/:id', checkRole2(["admin"]), deleteDepartment);
+router.patch('/manager/:departmentId/assign', checkRole2(["admin"]), assignManager)
 
-// Employee Management (Protected write)
-router.post('/employees', HRController.createEmployee);
-router.put('/employees/:id', HRController.updateEmployee);
+// Employee Management (HR - Cần auth)
+router.post('/employees', checkRole2(["hr"]), HRController.createEmployee);
+router.put('/employees/:id', checkRole2(["hr"]), HRController.updateEmployee);
 router.delete('/employees/:id', HRController.deleteEmployee);
 
 // --- ROLE MANAGER ---
