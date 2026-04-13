@@ -13,21 +13,12 @@ export const adminNavItems: NavItem[] = [
   { label: 'Dashboard', path: '/admin/dashboard', icon: 'layout-dashboard' },
   { label: 'Phòng ban', path: '/admin/departments', icon: 'building-2' },
   { label: 'Nhân viên', path: '/admin/employees', icon: 'users' },
-  { label: 'Chấm công', path: '/admin/attendance', icon: 'calendar-days' },
   { label: 'Khen thưởng', path: '/admin/rewards', icon: 'award' },
   { label: 'Báo cáo', path: '/admin/reports', icon: 'bar-chart-3' },
   { label: 'Cài đặt', path: '/admin/settings', icon: 'settings' },
 ];
 
-export const managerNavItems: NavItem[] = [
-  { label: 'Dashboard', path: '/manager/dashboard', icon: 'layout-dashboard' },
-  { label: 'Nhân viên', path: '/manager/employees', icon: 'users' },
-  { label: 'Phòng ban', path: '/manager/departments', icon: 'building-2' },
-  { label: 'Chấm công', path: '/manager/attendance', icon: 'calendar-days' },
-  { label: 'Nghỉ phép', path: '/manager/leave', icon: 'plane' },
-  { label: 'Lương', path: '/manager/salary', icon: 'wallet' },
-  { label: 'Khen thưởng', path: '/manager/rewards', icon: 'award' },
-];
+
 
 export const hrNavItems: NavItem[] = [
   { label: 'Dashboard', path: '/hr', icon: 'layout-dashboard' },
@@ -41,8 +32,19 @@ export const hrNavItems: NavItem[] = [
   { label: 'Reports', path: '/hr/reports', icon: 'bar-chart-3' },
 ];
 
+export const managerNavItems: NavItem[] = [
+  { label: 'Dashboard', path: '/manager/dashboard', icon: 'layout-dashboard' },
+  { label: 'Nhân viên', path: '/manager/employees', icon: 'users' },
+  { label: 'Phòng ban', path: '/manager/departments', icon: 'building-2' },
+  { label: 'Chấm công', path: '/manager/attendance', icon: 'calendar-days' },
+  { label: 'Nghỉ phép', path: '/manager/leave', icon: 'plane' },
+  { label: 'Lương', path: '/manager/salary', icon: 'wallet' },
+  { label: 'Khen thưởng', path: '/manager/rewards', icon: 'award' },
+];
+
 export const employeeNavItems: NavItem[] = [
   { label: 'Hồ sơ', path: '/employee', icon: 'user-circle' },
+  { label: 'Nhân viên', path: '/employee/employees', icon: 'users' },
   { label: 'Chấm công', path: '/employee/attendance', icon: 'calendar-days' },
   { label: 'Lương', path: '/employee/salary', icon: 'wallet' },
   { label: 'Nghỉ phép', path: '/employee/leave', icon: 'plane' },
@@ -197,7 +199,7 @@ export const attendanceRecords: AttendanceRecord[] = [
     date: '2026-03-19',
     checkIn: '08:10',
     checkOut: '17:30',
-    status: 'Trễ',
+    status: 'Đúng giờ',
     hours: 8,
   },
 
@@ -265,17 +267,7 @@ export const leaveRecords: LeaveRecord[] = [
     reason: 'Việc cá nhân',
     status: 'Chờ duyệt',
   },
-  {
-    id: 3,
-    employeeId: 4,
-    employeeName: 'Phạm Thị Hương',
-    type: 'Nghỉ bệnh',
-    startDate: '2026-03-23',
-    endDate: '2026-03-23',
-    days: 1,
-    reason: 'Sức khỏe',
-    status: 'Chờ duyệt',
-  },
+  
 ];
 
 export const contractRecords: ContractRecord[] = [

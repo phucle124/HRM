@@ -1,5 +1,5 @@
 import { NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom';
-import { useMemo, useState } from 'react';
+import { useMemo, useState, ReactNode } from 'react'; // Bổ sung import ReactNode
 
 import {
   brand,
@@ -139,7 +139,8 @@ function Topbar({
   );
 }
 
-export function AppLayout({ role }: { role: Role }) {
+// Bổ sung `children?: ReactNode` vào Props của AppLayout
+export function AppLayout({ role, children }: { role: Role; children?: ReactNode }) {
   const { logout } = useAuth();
   const navigate = useNavigate();
 
@@ -184,7 +185,8 @@ export function AppLayout({ role }: { role: Role }) {
         <Topbar role={role} />
 
         <main className="p-6">
-          <Outlet />
+          {/* Hiển thị children nếu có (từ App.tsx truyền xuống) */}
+          {children}
         </main>
       </div>
     </div>

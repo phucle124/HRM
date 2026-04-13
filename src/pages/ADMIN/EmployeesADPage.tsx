@@ -1,13 +1,11 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { useAuth } from '../../context/authContext';
 
-// Định nghĩa interface khớp với dữ liệu API mới
 interface Employee {
   id: number;
   name: string;
   email: string;
   department_name: string;
-  // Các trường dưới đây có thể bổ sung nếu API trả về thêm
   position?: string;
   phone?: string;
   status?: string;
@@ -22,45 +20,62 @@ export default function EmployeesADPage() {
   const [departmentFilter, setDepartmentFilter] = useState('');
   const [selectedEmployee, setSelectedEmployee] = useState<Employee | null>(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
 
   // Load danh sách nhân viên
   useEffect(() => {
+    // CHẶN: Nếu chưa có thông tin user (đang check session) thì không gọi API ngay
+    if (!user) return;
+
     const fetchEmployees = async () => {
       setLoading(true);
+      setError('');
       try {
         const res = await fetch(`${BASE_URL}/employees`, {
+          method: 'GET',
+          // ĐÃ SỬA: Thêm credentials để trình duyệt tự mang Cookie đi
+          credentials: 'include', 
           headers: {
             'Content-Type': 'application/json',
-            Authorization: `Bearer ${user?.token || ''}`,
+            // ĐÃ XOÁ: Không gửi Authorization Bearer nữa vì dùng Cookie rồi
           },
         });
 
         if (!res.ok) {
-          throw new Error('Không thể tải dữ liệu');
+          if (res.status === 401) throw new Error('Phiên đăng nhập hết hạn');
+          throw new Error('Không thể kết nối đến máy chủ');
         }
 
         const result = await res.json();
-        // Truy cập vào result.data theo cấu trúc JSON bạn cung cấp
-        setEmployees(Array.isArray(result.data) ? result.data : []);
-      } catch (err) {
+        
+        // Xử lý dữ liệu linh hoạt (đề phòng backend bọc trong .data hoặc trả về mảng trực tiếp)
+        const dataList = Array.isArray(result) ? result : (result.data || []);
+        setEmployees(dataList);
+
+      } catch (err: any) {
         console.error('Lỗi load nhân viên:', err);
+        setError(err.message || 'Không thể tải danh sách nhân viên lúc này.');
       } finally {
         setLoading(false);
       }
     };
 
     fetchEmployees();
-  }, [user]);
+  }, [user]); // Chạy lại khi user thay đổi (đăng nhập xong)
 
   // Filter nhân viên theo search (tên) và department_name
   const filteredEmployees = useMemo(() => {
     return employees.filter((emp) => {
       const matchesSearch = emp.name?.toLowerCase().includes(search.toLowerCase());
-      const matchesDepartment = 
-        departmentFilter === '' || emp.department_name === departmentFilter;
+      const matchesDepartment = departmentFilter === '' || emp.department_name === departmentFilter;
       return matchesSearch && matchesDepartment;
     });
   }, [employees, search, departmentFilter]);
+
+  // Lấy ra danh sách các phòng ban không trùng lặp để làm bộ lọc
+  const uniqueDepartments = useMemo(() => {
+    return [...new Set(employees.map((e) => e.department_name).filter(Boolean))];
+  }, [employees]);
 
   return (
     <div className="flex gap-6 p-4">
@@ -81,7 +96,7 @@ export default function EmployeesADPage() {
             onChange={(e) => setDepartmentFilter(e.target.value)}
           >
             <option value="">Tất cả phòng ban</option>
-            {[...new Set(employees.map((e) => e.department_name).filter(Boolean))].map((dep, idx) => (
+            {uniqueDepartments.map((dep, idx) => (
               <option key={idx} value={dep}>
                 {dep}
               </option>
@@ -103,6 +118,10 @@ export default function EmployeesADPage() {
               {loading ? (
                 <tr>
                   <td colSpan={4} className="text-center py-10 text-gray-400">Đang tải dữ liệu...</td>
+                </tr>
+              ) : error ? (
+                <tr>
+                  <td colSpan={4} className="text-center py-10 text-red-500 font-medium">{error}</td>
                 </tr>
               ) : filteredEmployees.length > 0 ? (
                 filteredEmployees.map((emp) => (
@@ -139,7 +158,7 @@ export default function EmployeesADPage() {
           <div className="flex justify-between items-center mb-6">
             <h2 className="text-xl font-bold text-gray-800">Thông tin chi tiết</h2>
             <button 
-              className="text-gray-400 hover:text-gray-600"
+              className="text-gray-400 hover:text-gray-600 transition text-lg"
               onClick={() => setSelectedEmployee(null)}
             >
               ✕
@@ -165,7 +184,7 @@ export default function EmployeesADPage() {
           </div>
           
           <button
-            className="mt-8 w-full py-2 bg-gray-100 text-gray-600 rounded-lg hover:bg-gray-200 transition"
+            className="mt-8 w-full py-2 bg-gray-100 text-gray-600 rounded-lg hover:bg-gray-200 transition font-medium"
             onClick={() => setSelectedEmployee(null)}
           >
             Đóng bảng tin

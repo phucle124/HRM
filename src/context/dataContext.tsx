@@ -19,13 +19,19 @@ export function AppDataProvider({ children }: { children: React.ReactNode }) {
   const [departments, setDepartments] = useState<any[]>([]);
 
   const fetchDepartments = useCallback(async () => {
-    if (!user?.token) return;
+    // ĐÃ SỬA: Chỉ cần kiểm tra có user là gọi, không cần token
+    if (!user) return; 
     try {
       const res = await fetch(`${BASE_URL}/departments`, {
-        headers: { Authorization: `Bearer ${user.token}` },
+        method: 'GET',
+        credentials: 'include', // ĐÃ SỬA: Chìa khóa vàng Cookie
       });
       const result = await res.json();
-      const formatted = (result.data || []).map((d: any) => ({
+      
+      // Xử lý an toàn đề phòng Backend trả về data kiểu khác nhau
+      const dataList = Array.isArray(result) ? result : (Array.isArray(result.data) ? result.data : []);
+      
+      const formatted = dataList.map((d: any) => ({
         id: d.department_id,
         name: d.name,
         managerId: d.manager_id,
@@ -34,20 +40,25 @@ export function AppDataProvider({ children }: { children: React.ReactNode }) {
     } catch (err) {
       console.error('Lỗi tải phòng ban', err);
     }
-  }, [user?.token]);
+  }, [user]); // ĐÃ SỬA: Dependency chỉ là user
 
   const fetchEmployees = useCallback(async () => {
-    if (!user?.token) return;
+    // ĐÃ SỬA: Chỉ cần kiểm tra có user
+    if (!user) return; 
     try {
       const res = await fetch(`${BASE_URL}/employees`, {
-        headers: { Authorization: `Bearer ${user.token}` },
+        method: 'GET',
+        credentials: 'include', // ĐÃ SỬA: Chìa khóa vàng Cookie
       });
       const result = await res.json();
-      setEmployees(result.data || []);
+      
+      // Xử lý an toàn dữ liệu
+      const dataList = Array.isArray(result) ? result : (Array.isArray(result.data) ? result.data : []);
+      setEmployees(dataList);
     } catch (err) {
       console.error('Lỗi tải nhân viên', err);
     }
-  }, [user?.token]);
+  }, [user]); // ĐÃ SỬA: Dependency chỉ là user
 
   useEffect(() => {
     fetchDepartments();

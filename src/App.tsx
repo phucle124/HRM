@@ -24,7 +24,6 @@ import MyContractPage from './pages/EMPLOYEE/MyContractPage';
 import AdminDashboardPage from './pages/ADMIN/AdminDashboardPage';
 import EmployeesADPage from './pages/ADMIN/EmployeesADPage';
 import DepartmentsADPage from './pages/ADMIN/DepartmentsADPage';
-import AttendanceADPage from './pages/ADMIN/AttendanceADPage';
 import RewardsADPage from './pages/ADMIN/RewardsADPage';
 import ReportsADPage from './pages/ADMIN/ReportsADPage';
 import SettingsADPage from './pages/ADMIN/SettingsADPage';
@@ -75,7 +74,6 @@ export default function App() {
         <Route path="/admin/dashboard" element={<AdminDashboardPage />} />
         <Route path="/admin/employees" element={<EmployeesADPage />} />
         <Route path="/admin/departments" element={<DepartmentsADPage />} />
-        <Route path="/admin/attendance" element={<AttendanceADPage />} />
         <Route path="/admin/rewards" element={<RewardsADPage />} />
         <Route path="/admin/reports" element={<ReportsADPage />} />
         <Route path="/admin/settings" element={<SettingsADPage />} />

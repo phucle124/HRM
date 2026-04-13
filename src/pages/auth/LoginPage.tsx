@@ -12,49 +12,50 @@ export default function LoginPage() {
   const [loading, setLoading] = useState(false);
 
   const handleLogin = async () => {
-  setError('');
-  setLoading(true);
+    setError('');
+    setLoading(true);
 
-  try {
-    const response = await fetch('https://hrm-phkz.onrender.com/login', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      credentials: 'include',
-      body: JSON.stringify({
-        email: username,
-        password: password,
-      }),
-    });
+    try {
+      const response = await fetch('https://hrm-phkz.onrender.com/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        credentials: 'include', // Rất quan trọng: Bật tính năng nhận Cookie từ Server
+        body: JSON.stringify({
+          email: username,
+          password: password,
+        }),
+      });
 
-   const data = await response.json();
+      const data = await response.json();
 
-    if (!response.ok) {
-      setError(data.message || 'Sai tài khoản hoặc mật khẩu');
-      setLoading(false);
-      return;
+      if (!response.ok) {
+        setError(data.message || 'Sai tài khoản hoặc mật khẩu');
+        setLoading(false);
+        return;
+      }
+
+      // ĐÃ SỬA: Chỉ lưu thông tin cơ bản, KHÔNG CẦN TOKEN NỮA
+      login({
+        id: data.data.id,
+        name: data.data.name,
+        email: username, // Dùng username người dùng nhập vào
+        role: data.data.role,
+      });
+
+      // Điều hướng theo Role
+      if (data.data.role === 'admin') navigate('/admin/dashboard');
+      else if (data.data.role === 'hr') navigate('/hr');
+      else if (data.data.role === 'manager') navigate('/manager/dashboard');
+      else navigate('/employee');
+
+    } catch (err) {
+      setError('Không kết nối được server');
     }
 
-    login({
-      id: data.data.id,
-      name: data.data.name,
-      email: username,
-      role: data.data.role,
-      token: data.token || data.data.token, // Kiểm tra xem server trả về token ở đâu thì lấy ở đó
-    });
-
-    if (data.data.role === 'admin') navigate('/admin/dashboard');
-    else if (data.data.role === 'hr') navigate('/hr');
-    else if (data.data.role === 'manager') navigate('/manager/dashboard');
-    else navigate('/employee');
-
-  } catch (err) {
-    setError('Không kết nối được server');
-  }
-
-  setLoading(false);
-};
+    setLoading(false);
+  };
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-[#f8f5f1] px-4">
