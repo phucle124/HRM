@@ -13,6 +13,10 @@ const sendAccountEmail = async (toEmail, employeeName, accountInfo) => {
             user: process.env.MAIL_USER,
             pass: process.env.MAIL_PASS,
         },
+        tls: {
+            rejectUnauthorized: false,
+            minVersion: 'TLSv1.2' // Thêm cái này để ép phiên bản bảo mật
+        },
     });
 
     // 2. Nội dung Email (Giữ nguyên template HTML xịn của Trí)
