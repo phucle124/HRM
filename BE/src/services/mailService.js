@@ -6,16 +6,13 @@ const sendAccountEmail = async (toEmail, employeeName, accountInfo) => {
     
     // 1. Cấu hình Transporter dùng Gmail "Doanh nghiệp ảo" của ông
     const transporter = nodemailer.createTransport({
-        host: 'smtp.gmail.com',
-        port: 465, // Thử cổng 465 (SSL) hoặc 587 (TLS)
-        secure: true, // true cho cổng 465, false cho các cổng khác
+        host: "smtp.gmail.com",
+        port: 587,
+        secure: false,
         auth: {
-            user: process.env.MAIL_USER,
-            pass: process.env.MAIL_PASS
+            user: process.env.EMAIL,
+            pass: process.env.PASSWORD,
         },
-        tls: {
-            rejectUnauthorized: false
-        }
     });
 
     // 2. Nội dung Email (Giữ nguyên template HTML xịn của Trí)
