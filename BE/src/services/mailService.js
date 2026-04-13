@@ -6,15 +6,17 @@ const sendAccountEmail = async (toEmail, employeeName, accountInfo) => {
     
     // 1. Cấu hình Transporter dùng Gmail "Doanh nghiệp ảo" của ông
     const transporter = nodemailer.createTransport({
-        service: 'gmail',
+        host: 'smtp.gmail.com',
+        port: 465, // Thử cổng 465 (SSL) hoặc 587 (TLS)
+        secure: true, // true cho cổng 465, false cho các cổng khác
         auth: {
-            user: 'hrm.manager.support@gmail.com', // Email mới tạo của ông
-            pass: 'jkznnknxdpnbrhty'            // Mã App Password ông vừa lấy
+            user: process.env.MAIL_USER,
+            pass: process.env.MAIL_PASS
         },
-    tls: {
-        rejectUnauthorized: false
-    }
-});
+        tls: {
+            rejectUnauthorized: false
+        }
+    });
 
     // 2. Nội dung Email (Giữ nguyên template HTML xịn của Trí)
     const mailOptions = {
@@ -43,10 +45,10 @@ const sendAccountEmail = async (toEmail, employeeName, accountInfo) => {
 
     try {
         await transporter.sendMail(mailOptions);
-        console.log("✅ Email sent successfully via HRM Support System!");
+        console.log("Email đã gửi thành công qua email của hệ thống HRM !");
         return true;
     } catch (error) {
-        console.error("❌ Email System Error:", error);
+        console.error("Lỗi Email:", error);
         return false;
     }
 };
