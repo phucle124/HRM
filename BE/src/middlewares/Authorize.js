@@ -17,9 +17,8 @@ const checkRole = (req,res,next)=>{
 
 const checkRole2 = (allowedRoles) => {
     return (req,res,next) =>{
-        const User = req.session.user;
 
-        if(!allowedRoles.includes(User.role)){
+        if(!allowedRoles.includes(req.session.user.role)){
             return res.status(403).json({message: "Không có quyền"})
         }
         next();

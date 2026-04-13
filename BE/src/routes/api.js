@@ -30,7 +30,7 @@ const checkRole2 = require('../middlewares/Authorize');
 
 // Auth API
 router.post('/login', LoginHandle);
-router.get('/session',checkRole, SessionContain);
+router.get('/session', SessionContain);
 
 // --- PUBLIC ENDPOINTS (Không cần auth) ---
 router.get('/departments', getAllDepartments);
