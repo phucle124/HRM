@@ -333,7 +333,7 @@ const editDepartmentPage = async (req,res)=>{
 
 const editDepartment = async(req,res)=>{
     
-    const DepartmentId = req.body.department_id;
+    const DepartmentId = req.params.id;
     
     const Department_Name = req.body.department_name;
     const managerId = req.body.manager_id;
