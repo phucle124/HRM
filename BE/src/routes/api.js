@@ -45,7 +45,7 @@ router.get('/employees/:id', HRController.getEmployeeById);
 router.get('/attendance', getAllAttendances);
 
 // --- PROTECTED ENDPOINTS (Cần auth) ---
-router.use(checkRole);
+//router.use(checkRole);
 
 // User Management (Admin)
 router.get('/users', getAllUsers); 
