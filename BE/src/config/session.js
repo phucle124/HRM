@@ -10,7 +10,7 @@ const sessionConfig = session({
 
     cookie: {
         httpOnly: true,
-        secure: false,       // true = HTTPS
+        secure: true,       // true = HTTPS
         sameSite: 'none',   // nếu FE khác domain vs BE
         maxAge: 1000 * 60 * 60 * 2 // ~ 2h (đổi sang mili giây)
     }
