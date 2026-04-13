@@ -23,7 +23,9 @@ app.set('trust proxy', 1); //Giúp express tin tưởng vào proxy này
 //MiddleWares
 app.use(cors({
     //origin: 'https://hrm-fe.42web.io/', // public url
-    origin: 'http://localhost:5173',
+    origin: ['http://localhost:5173',
+            'https://hrm-fe.42web.io/'
+    ],
     credentials: true                // Cho phép gửi Session/Cookie
 }));
 app.use(sessionConfig);
