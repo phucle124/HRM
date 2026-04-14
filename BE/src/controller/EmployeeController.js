@@ -3,14 +3,13 @@ const db = require('../config/db');
 // 1. Hàm lấy Profile
 exports.getProfile = async (req, res) => {
     try {
-        const userId = req.params.id || 4; 
+        const employeeId = req.params.id || 4; 
         const [rows] = await db.execute(
-            `SELECT e.*, u.email, u.phone, d.name as department_name 
+            `SELECT e.*, d.name as department_name 
              FROM employees e 
-             JOIN users u ON e.user_id = u.id 
              LEFT JOIN departments d ON e.department_id = d.department_id
-             WHERE e.user_id = ?`, 
-            [userId]
+             WHERE e.employee_id = ?`, 
+            [employeeId]
         );
         if (rows.length === 0) return res.status(404).json({ message: "Không tìm thấy" });
         return res.status(200).json(rows[0]);
