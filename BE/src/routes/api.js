@@ -18,14 +18,6 @@ const { Assign_Manager } = require('../services/CRUDService');
 const checkRole2 = require('../middlewares/Authorize');
 
 
-//Áp dụng middleware phân quyền cho API khác ngoài login,home,logout
-// router.use((req, res, next) => {
-//     if (req.path === '/login' || req.path === '/' || req.path === '/logout') return next();
-//     checkRole(req, res, next);
-// });
-
-
-
 // --- DANH SÁCH API ---
 
 // Auth API
@@ -40,7 +32,6 @@ router.get('/employees', HRController.getAllEmployees);
 router.get('/employees/:id', HRController.getEmployeeById);
 router.get('/attendance', getAllAttendances);
 
-// --- PROTECTED ENDPOINTS (Cần auth) ---
 //router.use(checkRole);
 
 // User Management (Admin - Cần auth)
@@ -62,21 +53,19 @@ router.post('/employees', checkRole2(["hr"]), HRController.createEmployee);
 router.put('/employees/:id', checkRole2(["hr"]), HRController.updateEmployee);
 router.delete('/employees/:id', HRController.deleteEmployee);
 
-// --- ROLE MANAGER ---
-// Link test: http://localhost:8888/manager/staff-list
+// MANAGER
+
 router.get('/manager/staff-list', ManagerController.getStaffPage);
-// Link duyệt nghỉ phép: http://localhost:8888/manager/approve-leave
+
 router.post('/manager/approve-leave', ManagerController.approveLeave);
 
 
 //Employee
-// Link lấy Profile: http://localhost:8888/api/employee/profile/4
+
 router.get('/employee/profile/:id', EmployeeController.getProfile);
 
-// Link Điểm danh: POST http://localhost:8888/api/employee/check-in
 router.post('/employee/check-in', EmployeeController.checkIn);
 
-// Link xem Lương: http://localhost:8888/api/employee/salary/2
 router.get('/employee/salary/:id', EmployeeController.getSalary);
 
 // Gán tài khoản cho nhân viên và gửi mail thông báo

@@ -2,7 +2,7 @@
 const {login} = require('../services/AuthenticateService');
 
 
-const {AllUsersData ,UserByIdData, CreateUser, UpdateUser, DeleteUser, LockUser, AllDepartmentsData, DepartmentByIdData, EditDepartment, DeleteDepartment, CreateDepartment, EmployeeByIdData, Employees_ByDepartmentId, Manager_BydepartmentId, Manager_ByDepartmentId, Assign_Manager} = require('../services/CRUDService')
+const {AllUsersData ,UserByIdData, CreateUser, UpdateUser, DeleteUser, LockUser, AllDepartmentsData, DepartmentByIdData, EditDepartment, DeleteDepartment, CreateDepartment, EmployeeByIdData, Employees_ByDepartmentId, Manager_BydepartmentId, Manager_ByDepartmentId, Assign_Manager, AllAttendancesData} = require('../services/CRUDService')
 
 
 
@@ -280,8 +280,9 @@ const createDepartmentPage = (req,res)=>{
 
 const createDepartment = async(req,res)=>{
     
-    const department_Name = req.body.department_name?.trim();  
-    const manager_Id = req.body.manager_id;
+    const department_Name = req.body.department_name.trim();  
+    // const manager_Id = req.body.manager_id;
+    const manager_Id = null;
 
 
     //EJS TEST
@@ -330,7 +331,7 @@ const editDepartmentPage = async (req,res)=>{
         currentManagerEdit: CurrentManagerBy_DepartmentId[0],
     });
 }
-
+    
 const editDepartment = async(req,res)=>{
     
     const DepartmentId = req.params.id;
@@ -388,7 +389,7 @@ const getEmployeesByDepartment = async (req, res) => {
         let departmentId = req.params.id; // Lấy ID từ URL
         
         // Gọi hàm từ CRUDService
-        let data = await CRUDService.Employees_ByDepartmentId(departmentId);
+        let data = await Employees_ByDepartmentId(departmentId);
         
         return res.status(200).json({
             message: "Thành công",
@@ -420,7 +421,7 @@ const assignManager = async(req,res)=>{
 }
 
 const getAllAttendances = async (req,res) =>{
-    res.status(200).json(await CRUDService.AllAttendancesData());
+    res.status(200).json(await AllAttendancesData());
 };
 
 
