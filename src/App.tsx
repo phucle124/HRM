@@ -31,7 +31,6 @@ import SettingsADPage from './pages/ADMIN/SettingsADPage';
 /* MANAGER */
 import DashboardMNPage from './pages/MANAGER/DashboardMNPage';
 import EmployeesMNPage from './pages/MANAGER/EmployeesMNPage';
-import DepartmentsMNPage from './pages/MANAGER/DepartmentsMNPage';
 import AttendanceMNPage from './pages/MANAGER/AttendanceMNPage';
 import LeaveMNPage from './pages/MANAGER/LeaveMNPage';
 import SalaryMNPage from './pages/MANAGER/SalaryMNPage';
@@ -92,16 +91,15 @@ export default function App() {
         <Route path="/hr/reports" element={<ReportsPage />} />
       </Route>
 
-      {/* MANAGER */}
-      <Route element={<ProtectedRoute role="manager" />}>
-        <Route path="/manager/dashboard" element={<DashboardMNPage />} />
-        <Route path="/manager/employees" element={<EmployeesMNPage />} />
-        {<Route path="/manager/departments" element={<DepartmentsMNPage />} />}
-        <Route path="/manager/attendance" element={<AttendanceMNPage />} />
-        <Route path="/manager/leave" element={<LeaveMNPage />} />
-        <Route path="/manager/salary" element={<SalaryMNPage />} />
-        {<Route path="/manager/rewards" element={<RewardsMNPage />} />}
-      </Route>
+      {/* SỬA LẠI ĐOẠN MANAGER NHƯ SAU: Bỏ các dấu {} bọc ngoài <Route> */}
+<Route element={<ProtectedRoute role="manager" />}>
+  <Route path="/manager/dashboard" element={<DashboardMNPage />} />
+  <Route path="/manager/employees" element={<EmployeesMNPage />} />
+  <Route path="/manager/attendance" element={<AttendanceMNPage />} />
+  <Route path="/manager/leave" element={<LeaveMNPage />} />
+  <Route path="/manager/salary" element={<SalaryMNPage />} />
+  <Route path="/manager/rewards" element={<RewardsMNPage />} />
+</Route>
 
       {/* EMPLOYEE */}
       <Route element={<ProtectedRoute role="employee" />}>

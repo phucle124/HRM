@@ -35,7 +35,6 @@ export const hrNavItems: NavItem[] = [
 export const managerNavItems: NavItem[] = [
   { label: 'Dashboard', path: '/manager/dashboard', icon: 'layout-dashboard' },
   { label: 'Nhân viên', path: '/manager/employees', icon: 'users' },
-  { label: 'Phòng ban', path: '/manager/departments', icon: 'building-2' },
   { label: 'Chấm công', path: '/manager/attendance', icon: 'calendar-days' },
   { label: 'Nghỉ phép', path: '/manager/leave', icon: 'plane' },
   { label: 'Lương', path: '/manager/salary', icon: 'wallet' },

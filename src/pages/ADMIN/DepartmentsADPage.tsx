@@ -80,13 +80,10 @@ export default function DepartmentsADPage() {
     setShowModal(true);
   };
 
-  const saveDepartment = async () => {
-    console.log(user);
-    
-    // Chỉ kiểm tra user, không kiểm tra token nữa
+ const saveDepartment = async () => {
     if (!user) return alert('Hết phiên làm việc, vui lòng đăng nhập lại!');
     
-    // try {
+    try { // BỎ COMMENT DÒNG NÀY
       const deptId = editingDept?.id;
       if (editingDept && !deptId) {
         return alert("Lỗi dữ liệu: Không tìm thấy ID phòng ban để cập nhật.");
@@ -95,20 +92,15 @@ export default function DepartmentsADPage() {
       const url = editingDept ? `${BASE_URL}/departments/${deptId}` : `${BASE_URL}/departments`;
       const method = editingDept ? 'PUT' : 'POST';
 
-      console.log('method =>', method);
-      console.log('url1231231 =>', url);
-      
-
       const response = await fetch(url, {
         method,
-        credentials: 'include', // Gửi kèm Cookie
+        credentials: 'include',
         headers: { 
           'Content-Type': 'application/json', 
         },
         body: JSON.stringify({
-          name: formData.name,
+          department_name: formData.name, // SỬA QUAN TRỌNG: Đổi từ 'name' thành 'department_name'
           manager_id: formData.manager_id ? Number(formData.manager_id) : null,
-          managerId: formData.manager_id ? Number(formData.manager_id) : null,
         }),
       });
 
@@ -117,17 +109,14 @@ export default function DepartmentsADPage() {
         throw new Error(errorData.message || 'Lưu thất bại');
       }
 
-      console.log(response);
-      
-
       alert('Cập nhật thành công!');
       setShowModal(false);
-      fetchDepartments(); // Gọi lại hàm để cập nhật danh sách
+      fetchDepartments(); 
 
-    // } catch (err: any) {
-    //   console.error('Lỗi khi lưu:', err);
-    //   alert('Lỗi: ' + err.message);
-    // }
+    } catch (err: any) { // BỎ COMMENT DÒNG NÀY
+      console.error('Lỗi khi lưu:', err);
+      alert('Lỗi: ' + (err.message || 'Đã có lỗi xảy ra'));
+    } // BỎ COMMENT DÒNG NÀY
   };
 
   const deleteDepartment = async (id: number) => {

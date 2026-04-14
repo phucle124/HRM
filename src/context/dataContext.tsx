@@ -4,70 +4,150 @@ import { useAuth } from './authContext';
 const BASE_URL = 'https://hrm-phkz.onrender.com';
 
 interface AppDataContextValue {
+  users: any[];
   employees: any[];
   departments: any[];
-  fetchDepartments: () => Promise<void>;
+  fetchUsers: () => Promise<void>;
+  createUser: (data: any) => Promise<void>;
+  updateUser: (id: number, data: any) => Promise<void>;
+  deleteUser: (id: number) => Promise<void>;
+  lockUser: (id: number) => Promise<void>;
   fetchEmployees: () => Promise<void>;
-  setDepartments: React.Dispatch<React.SetStateAction<any[]>>;
+  addEmployee: (data: any) => Promise<void>;
+  updateEmployee: (id: number, data: any) => Promise<void>;
+  deleteEmployee: (id: number) => Promise<void>;
+  fetchDepartments: () => Promise<void>;
 }
 
 const AppDataContext = createContext<AppDataContextValue | undefined>(undefined);
 
 export function AppDataProvider({ children }: { children: React.ReactNode }) {
   const { user } = useAuth();
+  const [users, setUsers] = useState<any[]>([]);
   const [employees, setEmployees] = useState<any[]>([]);
   const [departments, setDepartments] = useState<any[]>([]);
 
-  const fetchDepartments = useCallback(async () => {
-    // ĐÃ SỬA: Chỉ cần kiểm tra có user là gọi, không cần token
-    if (!user) return; 
+  // Hàm mẫu cho fetch dữ liệu dùng Session
+  const fetchWithSession = useCallback(async (endpoint: string, options: RequestInit = {}) => {
+    return fetch(`${BASE_URL}${endpoint}`, {
+      ...options,
+      credentials: 'include', // BẮT BUỘC: Để gửi session cookie
+      headers: {
+        'Content-Type': 'application/json',
+        ...options.headers,
+      },
+    });
+  }, []);
+
+  /* =========================================
+     PHẦN 1: ADMIN (USERS)
+  ========================================= */
+  const fetchUsers = useCallback(async () => {
+    if (!user || user.role !== 'admin') return;
     try {
-      const res = await fetch(`${BASE_URL}/departments`, {
-        method: 'GET',
-        credentials: 'include', // ĐÃ SỬA: Chìa khóa vàng Cookie
-      });
+      const res = await fetchWithSession('/users');
       const result = await res.json();
-      
-      // Xử lý an toàn đề phòng Backend trả về data kiểu khác nhau
-      const dataList = Array.isArray(result) ? result : (Array.isArray(result.data) ? result.data : []);
-      
-      const formatted = dataList.map((d: any) => ({
+      setUsers(result.data || []);
+    } catch (err) { console.error('Lỗi tải Users', err); }
+  }, [user, fetchWithSession]);
+
+  const createUser = async (data: any) => {
+    try {
+      const res = await fetchWithSession('/users', {
+        method: 'POST',
+        body: JSON.stringify(data),
+      });
+      if (res.ok) await fetchUsers();
+    } catch (err) { console.error(err); }
+  };
+
+  /* =========================================
+     PHẦN 2: HR / MANAGER (EMPLOYEES)
+  ========================================= */
+  const fetchEmployees = useCallback(async () => {
+    if (!user) return;
+    try {
+      const res = await fetchWithSession('/employees');
+      const result = await res.json();
+      setEmployees(result.data || []);
+    } catch (err) { console.error('Lỗi tải nhân viên', err); }
+  }, [user, fetchWithSession]);
+
+  const fetchDepartments = useCallback(async () => {
+    if (!user) return;
+    try {
+      const res = await fetchWithSession('/departments');
+      const result = await res.json();
+      const formatted = (result.data || []).map((d: any) => ({
         id: d.department_id,
         name: d.name,
         managerId: d.manager_id,
       }));
       setDepartments(formatted);
-    } catch (err) {
-      console.error('Lỗi tải phòng ban', err);
-    }
-  }, [user]); // ĐÃ SỬA: Dependency chỉ là user
+    } catch (err) { console.error(err); }
+  }, [user, fetchWithSession]);
 
-  const fetchEmployees = useCallback(async () => {
-    // ĐÃ SỬA: Chỉ cần kiểm tra có user
-    if (!user) return; 
+  // Các hàm CRUD khác cho Employee (Tương tự createUser)
+  const addEmployee = async (data: any) => {
     try {
-      const res = await fetch(`${BASE_URL}/employees`, {
-        method: 'GET',
-        credentials: 'include', // ĐÃ SỬA: Chìa khóa vàng Cookie
-      });
-      const result = await res.json();
-      
-      // Xử lý an toàn dữ liệu
-      const dataList = Array.isArray(result) ? result : (Array.isArray(result.data) ? result.data : []);
-      setEmployees(dataList);
-    } catch (err) {
-      console.error('Lỗi tải nhân viên', err);
-    }
-  }, [user]); // ĐÃ SỬA: Dependency chỉ là user
+      const res = await fetchWithSession('/employees', { method: 'POST', body: JSON.stringify(data) });
+      if (res.ok) await fetchEmployees();
+    } catch (err) { console.error(err); }
+  };
+
+  const updateEmployee = async (id: number, data: any) => {
+    try {
+      const res = await fetchWithSession(`/employees/${id}`, { method: 'PUT', body: JSON.stringify(data) });
+      if (res.ok) await fetchEmployees();
+    } catch (err) { console.error(err); }
+  };
+
+  const deleteEmployee = async (id: number) => {
+    try {
+      const res = await fetchWithSession(`/employees/${id}`, { method: 'DELETE' });
+      if (res.ok) await fetchEmployees();
+    } catch (err) { console.error(err); }
+  };
+
+  const updateUser = async (id: number, data: any) => {
+    try {
+      const res = await fetchWithSession(`/users/${id}`, { method: 'PUT', body: JSON.stringify(data) });
+      if (res.ok) await fetchUsers();
+    } catch (err) { console.error(err); }
+  };
+
+  const deleteUser = async (id: number) => {
+    try {
+      const res = await fetchWithSession(`/users/${id}`, { method: 'DELETE' });
+      if (res.ok) await fetchUsers();
+    } catch (err) { console.error(err); }
+  };
+
+  const lockUser = async (id: number) => {
+    try {
+      const res = await fetchWithSession(`/users/${id}/lock`, { method: 'PATCH' });
+      if (res.ok) await fetchUsers();
+    } catch (err) { console.error(err); }
+  };
 
   useEffect(() => {
-    fetchDepartments();
-    fetchEmployees();
-  }, [fetchDepartments, fetchEmployees]);
+    if (user) {
+      if (user.role === 'admin') {
+        fetchUsers();
+      } else {
+        fetchEmployees();
+        fetchDepartments();
+      }
+    }
+  }, [user, fetchUsers, fetchEmployees, fetchDepartments]);
 
   const value = useMemo(
-    () => ({ employees, departments, fetchDepartments, fetchEmployees, setDepartments }),
-    [employees, departments, fetchDepartments, fetchEmployees]
+    () => ({
+      users, employees, departments,
+      fetchUsers, createUser, updateUser, deleteUser, lockUser,
+      fetchEmployees, addEmployee, updateEmployee, deleteEmployee, fetchDepartments
+    }),
+    [users, employees, departments, fetchUsers, fetchEmployees, fetchDepartments]
   );
 
   return <AppDataContext.Provider value={value}>{children}</AppDataContext.Provider>;
