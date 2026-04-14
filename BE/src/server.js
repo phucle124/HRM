@@ -22,7 +22,7 @@ app.set('trust proxy', 1); //Giúp express tin tưởng vào proxy này
 
 //MiddleWares
 app.use(cors({
-    origin: 'https://hrm-fe.42web.io/', // public url
+    origin: 'https://hrm-fe.42web.io', // public url
    
     credentials: true                // Cho phép gửi Session/Cookie
 }));
