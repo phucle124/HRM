@@ -1,50 +1,45 @@
 import React from 'react';
-import { leaveRecords, employees } from '../../data/mockData';
+import { PageTitle, Card, Table, EmployeeChip, StatusBadge } from '../../components/ui';
 
-const LeaveMNPage: React.FC = () => {
-  const managerDepartment = 'Nhân sự';
+const MOCK_LEAVES = [
+  { id: 101, name: 'Lê Anh Đức', type: 'Phép năm', start: '25/04/2026', end: '26/04/2026', days: 2, reason: 'Giải quyết việc gia đình', status: 'Chờ duyệt' },
+  { id: 102, name: 'Phạm Văn Long', type: 'Nghỉ ốm', start: '20/04/2026', end: '20/04/2026', days: 1, reason: 'Sốt siêu vi', status: 'Đã duyệt' },
+];
 
-  const departmentEmployees = employees.filter(
-    (emp) => emp.department === managerDepartment
-  );
-
-  const departmentLeaves = leaveRecords.filter((leave) =>
-    departmentEmployees.some((emp) => emp.id === leave.employeeId)
-  );
-
+export default function LeaveMNPage() {
   return (
-    <div className="p-6">
-      <h1 className="text-3xl font-bold mb-6">
-        Duyệt nghỉ phép phòng {managerDepartment}
-      </h1>
+    <div className="space-y-6">
+      <PageTitle title="Quản lý Nghỉ phép" subtitle="Xét duyệt đơn từ của nhân viên phòng ban" />
 
-      <div className="bg-white rounded-xl shadow overflow-hidden">
-        <table className="w-full table-auto">
-          <thead className="bg-gray-100">
-            <tr>
-              <th className="p-4 text-left">Nhân viên</th>
-              <th className="p-4 text-left">Loại nghỉ</th>
-              <th className="p-4 text-left">Từ ngày</th>
-              <th className="p-4 text-left">Đến ngày</th>
-              <th className="p-4 text-left">Trạng thái</th>
+      <Card title="Danh sách đơn từ">
+        <Table columns={['Nhân viên', 'Loại nghỉ', 'Thời gian', 'Lý do', 'Trạng thái', 'Hành động']}>
+          {MOCK_LEAVES.map((leave) => (
+            <tr key={leave.id} className="hover:bg-stone-50 transition-colors">
+              <td className="px-5 py-4">
+                <EmployeeChip name={leave.name} detail={`${leave.days} ngày`} avatar={leave.name.substring(0, 2).toUpperCase()} compact />
+              </td>
+              <td className="px-5 py-4 font-medium text-stone-900">{leave.type}</td>
+              <td className="px-5 py-4 text-stone-600 text-sm">
+                {leave.start} - {leave.end}
+              </td>
+              <td className="px-5 py-4 text-stone-500 italic max-w-xs truncate">{leave.reason}</td>
+              <td className="px-5 py-4">
+                <StatusBadge status={leave.status} />
+              </td>
+              <td className="px-5 py-4">
+                {leave.status === 'Chờ duyệt' ? (
+                  <div className="flex gap-2">
+                    <button className="text-xs font-bold text-emerald-600 bg-emerald-50 px-3 py-1 rounded-lg border border-emerald-200 hover:bg-emerald-100">Duyệt</button>
+                    <button className="text-xs font-bold text-rose-600 bg-rose-50 px-3 py-1 rounded-lg border border-rose-200 hover:bg-rose-100">Từ chối</button>
+                  </div>
+                ) : (
+                  <span className="text-sm text-stone-400">Đã xử lý</span>
+                )}
+              </td>
             </tr>
-          </thead>
-
-          <tbody>
-            {departmentLeaves.map((item) => (
-              <tr key={item.id} className="border-b hover:bg-gray-50">
-                <td className="p-4">{item.employeeName}</td>
-                <td className="p-4">{item.type}</td>
-                <td className="p-4">{item.startDate}</td>
-                <td className="p-4">{item.endDate}</td>
-                <td className="p-4">{item.status}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
+          ))}
+        </Table>
+      </Card>
     </div>
   );
-};
-
-export default LeaveMNPage;
+}

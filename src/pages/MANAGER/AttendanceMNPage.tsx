@@ -1,50 +1,45 @@
-import React from 'react';
-import { attendanceRecords, employees } from '../../data/mockData';
+import React, { useState } from 'react';
+import { PageTitle, Card, Table, EmployeeChip, StatusBadge, Input } from '../../components/ui';
 
-const AttendanceMNPage: React.FC = () => {
-  const managerDepartment = 'Nhân sự';
+const MOCK_ATTENDANCE = [
+  { id: 1, name: 'Nguyễn Văn A', date: '24/04/2026', checkIn: '07:55', checkOut: '17:30', status: 'Đúng giờ', hours: 8 },
+  { id: 2, name: 'Lê Anh Đức', date: '24/04/2026', checkIn: '08:15', checkOut: '17:45', status: 'Đi muộn', hours: 8 },
+  { id: 3, name: 'Trần Thu Hà', date: '24/04/2026', checkIn: '--:--', checkOut: '--:--', status: 'Nghỉ phép', hours: 0 },
+];
 
-  const departmentEmployees = employees.filter(
-    (emp) => emp.department === managerDepartment
-  );
-
-  const departmentAttendance = attendanceRecords.filter((record) =>
-    departmentEmployees.some((emp) => emp.id === record.employeeId)
-  );
+export default function AttendanceMNPage() {
+  const [date, setDate] = useState('2026-04-24'); // Lấy ngày mặc định
 
   return (
-    <div className="p-6">
-      <h1 className="text-3xl font-bold mb-6">
-        Chấm công phòng {managerDepartment}
-      </h1>
+    <div className="space-y-6">
+      <PageTitle title="Quản lý Chấm công" subtitle="Theo dõi giờ giấc làm việc của nhân viên" />
 
-      <div className="bg-white rounded-xl shadow overflow-hidden">
-        <table className="w-full">
-          <thead className="bg-gray-100">
-            <tr>
-              <th className="p-4 text-left">Nhân viên</th>
-              <th className="p-4 text-left">Ngày</th>
-              <th className="p-4 text-left">Check In</th>
-              <th className="p-4 text-left">Check Out</th>
-              <th className="p-4 text-left">Trạng thái</th>
+      <Card title="Lịch sử chấm công">
+        <div className="mb-6 max-w-xs">
+          <Input 
+            type="date" 
+            label="Chọn ngày xem báo cáo" 
+            value={date} 
+            onChange={(val) => setDate(val)} 
+          />
+        </div>
+
+        <Table columns={['Nhân viên', 'Giờ vào', 'Giờ ra', 'Tổng giờ', 'Trạng thái']}>
+          {MOCK_ATTENDANCE.map((record) => (
+            <tr key={record.id} className="hover:bg-stone-50 transition-colors">
+              <td className="px-5 py-4">
+                <EmployeeChip name={record.name} detail={`Ngày: ${record.date}`} avatar={record.name.substring(0, 2).toUpperCase()} compact />
+              </td>
+              <td className="px-5 py-4 font-mono text-stone-600">{record.checkIn}</td>
+              <td className="px-5 py-4 font-mono text-stone-600">{record.checkOut}</td>
+              <td className="px-5 py-4 font-semibold text-stone-900">{record.hours}h</td>
+              <td className="px-5 py-4">
+                <StatusBadge status={record.status} />
+              </td>
             </tr>
-          </thead>
-
-          <tbody>
-            {departmentAttendance.map((item) => (
-              <tr key={item.id} className="border-t">
-                <td className="p-4">{item.employeeName}</td>
-                <td className="p-4">{item.date}</td>
-                <td className="p-4">{item.checkIn}</td>
-                <td className="p-4">{item.checkOut}</td>
-                <td className="p-4">{item.status}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
+          ))}
+        </Table>
+      </Card>
     </div>
   );
-};
-
-export default AttendanceMNPage;
+}
