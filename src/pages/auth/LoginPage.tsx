@@ -29,7 +29,7 @@ export default function LoginPage() {
       });
 
       const data = await response.json();
-
+      console.log("Dữ liệu User từ Server:", data.data);
       if (!response.ok) {
         setError(data.message || 'Sai tài khoản hoặc mật khẩu');
         setLoading(false);

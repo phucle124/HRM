@@ -15,28 +15,26 @@ export default function ProfilePage() {
     // Nếu chưa đăng nhập (hoặc đang load cookie) thì đứng im
     if (!user) return;
 
-    const fetchMyProfile = async () => {
-      setLoading(true);
-      try {
-        // 2. Thay số 4 cứng nhắc bằng biến user.id linh hoạt
-        // Ví dụ: user.id là 10 => Link sẽ tự động thành .../profile/10
-        const res = await fetch(`${BASE_URL}/api/employee/profile/${user.id}`, {
-          method: 'GET',
-          credentials: 'include', // LUÔN LUÔN CÓ DÒNG NÀY ĐỂ TRÁNH LỖI 401
-        });
+    // DashboardMNPage.tsx
+const fetchMyProfile = async () => {
+  if (!user?.id) return;
+  try {
+    const res = await fetch(`${BASE_URL}/api/employee/profile/${user.id}`, {
+      credentials: 'include'
+    });
 
-        if (!res.ok) throw new Error('Không thể tải hồ sơ');
+    if (res.status === 404) {
+      console.warn("Không tìm thấy hồ sơ cho ID:", user.id);
+      return; // Không văng Error, trang sẽ hiển thị mặc định
+    }
 
-        const data = await res.json();
-        // Set dữ liệu profile (Tùy theo Backend của bạn trả về data bọc trong object hay không)
-        setProfile(data.data || data); 
-
-      } catch (err) {
-        console.error('Lỗi khi lấy hồ sơ:', err);
-      } finally {
-        setLoading(false);
-      }
-    };
+    if (!res.ok) throw new Error('Không thể tải hồ sơ');
+    const data = await res.json();
+    setProfile(data.data || data);
+  } catch (err) {
+    console.error("Lỗi khi lấy hồ sơ:", err);
+  }
+};
 
     fetchMyProfile();
   }, [user]); // Mảng dependency có chữ 'user', nghĩa là hễ user xuất hiện là nó gọi API ngay

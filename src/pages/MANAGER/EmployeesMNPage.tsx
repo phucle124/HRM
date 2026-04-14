@@ -1,120 +1,153 @@
-import React, { useState, useEffect, useMemo } from 'react';
-import { useAppData } from '../../context/dataContext';
+import React, { useEffect, useState, useMemo } from 'react';
+import { useAuth } from '../../context/authContext';
+// Import các component UI đã có sẵn trong project của bạn
+import { PageTitle, Card, Table, EmployeeChip, Input, StatusBadge } from '../../components/ui';
 
-export default function EmployeesADPage() {
-  // Lấy dữ liệu users từ context (Admin quản lý Users)
-  // Lưu ý: Nếu Backend gọi là employees thì bạn đổi thành lấy từ employees nhé
-  const { users, fetchUsers } = useAppData(); 
-  
+const BASE_URL = 'https://hrm-phkz.onrender.com';
+
+// Interface khớp với dữ liệu thực tế từ Backend
+interface Employee {
+  id: number;
+  name: string;
+  email: string;
+  department_name: string;
+  position?: string;
+  phone?: string;
+  status?: string;
+  avatar?: string;
+}
+
+export default function EmployeesMNPage() {
+  const { user } = useAuth();
+  const [employees, setEmployees] = useState<Employee[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
-  const [filterDept, setFilterDept] = useState('Tất cả phòng ban');
 
-  // Gọi API tải dữ liệu khi vừa vào trang
+  // 1. Lấy danh sách nhân viên của phòng ban (Manager Role)
   useEffect(() => {
-    fetchUsers();
-  }, [fetchUsers]);
-
-  // Tự động lấy ra danh sách các phòng ban (không trùng lặp) để hiển thị trong Dropdown
-  const departmentOptions = useMemo(() => {
-    const depts = users
-      .map((u) => u.department_name)
-      .filter((name) => name); // Loại bỏ các giá trị rỗng/null
-    return ['Tất cả phòng ban', ...new Set(depts)];
-  }, [users]);
-
-  // Logic Lọc (Filter) và Tìm kiếm (Search)
-  const filteredData = useMemo(() => {
-    return users.filter((user) => {
-      // Tìm theo tên
-      const matchName = user.name?.toLowerCase().includes(searchTerm.toLowerCase());
-      // Lọc theo phòng ban
-      const matchDept = filterDept === 'Tất cả phòng ban' || user.department_name === filterDept;
+    const fetchStaff = async () => {
+      if (!user) return;
       
-      return matchName && matchDept;
-    });
-  }, [users, searchTerm, filterDept]);
+      try {
+        setLoading(true);
+        // Sử dụng API dành riêng cho Manager
+        const res = await fetch(`${BASE_URL}/manager/staff-list`, {
+          method: 'GET',
+          credentials: 'include', // Quan trọng để gửi Session Cookie
+        });
+
+        if (!res.ok) {
+          throw new Error('Không thể tải danh sách nhân viên của phòng ban.');
+        }
+
+        const result = await res.json();
+        
+        // Chuẩn hóa dữ liệu trả về thành mảng
+        const dataList = Array.isArray(result) ? result : (Array.isArray(result.data) ? result.data : []);
+        setEmployees(dataList);
+      } catch (err: any) {
+        console.error('Lỗi fetch staff:', err);
+        setError(err.message);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchStaff();
+  }, [user]);
+
+  // 2. Logic tìm kiếm theo tên
+  const filteredEmployees = useMemo(() => {
+    return employees.filter(emp => 
+      emp.name?.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+  }, [employees, searchTerm]);
+
+  // Lấy tên phòng ban để hiển thị
+  const departmentName = user?.departmentName || employees[0]?.department_name || 'Phòng ban của bạn';
+
+  // Hàm hỗ trợ tạo chữ cái viết tắt cho Avatar (Ví dụ: "Nguyễn Văn A" -> "VA")
+  const getInitials = (name: string) => {
+    if (!name) return 'NV';
+    const parts = name.trim().split(' ');
+    if (parts.length === 1) return parts[0].substring(0, 2).toUpperCase();
+    return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
+  };
+
+  // Giao diện khi đang tải
+  if (loading) {
+    return (
+      <div className="flex min-h-[400px] items-center justify-center text-stone-500 font-medium animate-pulse">
+        Đang tải danh sách nhân viên phòng ban...
+      </div>
+    );
+  }
+
+  // Giao diện khi lỗi
+  if (error) {
+    return (
+      <div className="rounded-2xl border border-rose-200 bg-rose-50 p-6 text-rose-700">
+        <p className="font-semibold">Đã xảy ra lỗi:</p>
+        <p className="mt-1 text-sm">{error}</p>
+      </div>
+    );
+  }
 
   return (
-    <div className="p-6">
-      <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 max-w-5xl">
+    <div className="space-y-6">
+      {/* Sử dụng PageTitle của bạn */}
+      <PageTitle 
+        title="Nhân viên phòng ban" 
+        subtitle={`Quản lý danh sách nhân sự thuộc ${departmentName}`} 
+      />
+
+      {/* Sử dụng Card của bạn */}
+      <Card title={`Danh sách nhân viên (${filteredEmployees.length})`}>
         
-        {/* THANH TÌM KIẾM VÀ LỌC */}
-        <div className="flex flex-wrap items-center gap-4 mb-6">
-          <input
+        {/* THANH TÌM KIẾM - Sử dụng Input component */}
+        <div className="mb-6 max-w-md">
+          <Input
+            label=""
             type="text"
-            placeholder="Tìm theo tên..."
-            className="border border-gray-200 rounded-xl px-4 py-2.5 w-full sm:w-64 focus:outline-none focus:border-blue-400 focus:ring-1 focus:ring-blue-400 transition"
+            placeholder="🔍 Tìm kiếm theo tên nhân viên..."
             value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
+            onChange={(val) => setSearchTerm(val)} // Component Input của bạn trả về string trực tiếp
           />
-          
-          <select
-            className="border border-gray-200 rounded-xl px-4 py-2.5 focus:outline-none focus:border-blue-400 focus:ring-1 focus:ring-blue-400 transition bg-white text-gray-700"
-            value={filterDept}
-            onChange={(e) => setFilterDept(e.target.value)}
-          >
-            {departmentOptions.map((dept, idx) => (
-              <option key={idx} value={dept as string}>
-                {dept}
-              </option>
-            ))}
-          </select>
         </div>
 
-        {/* BẢNG DỮ LIỆU */}
-        <div className="overflow-x-auto">
-          <table className="w-full text-left border-collapse min-w-[600px]">
-            <thead>
-              <tr className="border-b border-gray-100">
-                <th className="py-4 px-4 text-sm font-semibold text-gray-700 w-20">ID</th>
-                <th className="py-4 px-4 text-sm font-semibold text-gray-700">Họ tên</th>
-                <th className="py-4 px-4 text-sm font-semibold text-gray-700">Phòng ban</th>
-                <th className="py-4 px-4 text-sm font-semibold text-gray-700">Email</th>
+        {/* BẢNG DỮ LIỆU - Sử dụng component Table của bạn */}
+        <Table columns={['Nhân viên', 'Vị trí', 'Phòng ban', 'Trạng thái']}>
+          {filteredEmployees.length > 0 ? (
+            filteredEmployees.map((emp) => (
+              <tr key={emp.id} className="transition-colors hover:bg-[#f6efe7]/40">
+                <td className="px-5 py-4">
+                  <EmployeeChip 
+                    name={emp.name} 
+                    detail={emp.email} 
+                    avatar={emp.avatar || getInitials(emp.name)} 
+                  />
+                </td>
+                <td className="px-5 py-4 font-medium text-stone-900">
+                  {emp.position || 'Nhân viên'}
+                </td>
+                <td className="px-5 py-4 text-stone-600">
+                  {emp.department_name}
+                </td>
+                <td className="px-5 py-4">
+                  <StatusBadge status={emp.status || 'Đang làm'} />
+                </td>
               </tr>
-            </thead>
-            <tbody>
-              {filteredData.map((user, idx) => (
-                <tr 
-                  key={user.id || idx} 
-                  className="border-b border-gray-50 hover:bg-gray-50/50 transition-colors"
-                >
-                  {/* Cột ID */}
-                  <td className="py-4 px-4 text-gray-500 text-sm">
-                    #{user.id}
-                  </td>
-                  
-                  {/* Cột Họ Tên (Màu xanh, có thể click) */}
-                  <td className="py-4 px-4 text-blue-600 font-medium hover:underline cursor-pointer">
-                    {user.name}
-                  </td>
-                  
-                  {/* Cột Phòng ban (Badge xám) */}
-                  <td className="py-4 px-4">
-                    <span className="bg-gray-100 text-gray-600 px-3 py-1.5 rounded-full text-xs font-medium whitespace-nowrap">
-                      {user.department_name || 'Chưa xếp'}
-                    </span>
-                  </td>
-                  
-                  {/* Cột Email (In nghiêng) */}
-                  <td className="py-4 px-4 text-gray-500 italic text-sm">
-                    {user.email || 'Chưa cập nhật'}
-                  </td>
-                </tr>
-              ))}
-
-              {/* Trạng thái trống */}
-              {filteredData.length === 0 && (
-                <tr>
-                  <td colSpan={4} className="py-10 text-center text-gray-500">
-                    Không tìm thấy dữ liệu phù hợp với tìm kiếm của bạn.
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </table>
-        </div>
-
-      </div>
+            ))
+          ) : (
+            <tr>
+              <td colSpan={4} className="px-5 py-12 text-center text-stone-500 italic">
+                Không tìm thấy nhân viên nào phù hợp với từ khóa "{searchTerm}".
+              </td>
+            </tr>
+          )}
+        </Table>
+      </Card>
     </div>
   );
 }

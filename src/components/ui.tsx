@@ -288,11 +288,18 @@ export function Drawer({ open, title, description, children, onClose }: OverlayP
   );
 }
 
-export function Input(props: InputHTMLAttributes<HTMLInputElement> & { label: string; value: string | number; onChange: (value: string) => void; type?: string }) {
+export function Input(
+  props: Omit<InputHTMLAttributes<HTMLInputElement>, 'onChange' | 'value'> & { 
+    label?: string; 
+    value: string | number; 
+    onChange: (value: string) => void; 
+    type?: string;
+  }
+) {
   const { label, value, onChange, type = 'text', className = '', ...rest } = props;
   return (
-    <label className="block">
-      <span className="mb-2 block text-sm font-semibold text-stone-700">{label}</span>
+    <label className={label ? "block" : "block relative"}>
+      {label && <span className="mb-2 block text-sm font-semibold text-stone-700">{label}</span>}
       <input
         type={type}
         value={value}
