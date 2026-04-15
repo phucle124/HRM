@@ -17,10 +17,10 @@ const ManagerService = {
     },
 
     // Duyệt hoặc từ chối đơn nghỉ phép (Cập nhật bảng leaves)
-    updateLeaveStatus: async (leaveId, status) => {
+    updateLeaveStatus: async (leave_Id, status) => {
         try {
             const query = `UPDATE leaves SET status = ? WHERE leave_id = ?`;
-            const [result] = await db.execute(query, [status, leaveId]);
+            const [result] = await db.execute(query, [status, leave_Id]);
             return result;
         } catch (error) {
             throw error;

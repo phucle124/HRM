@@ -20,14 +20,14 @@ const ManagerController = {
     approveLeave: async (req, res) => {
         try {
             // Dữ liệu này sẽ do Frontend (hoặc Postman) gửi lên
-            const { leaveId, status } = req.body; 
+            const { leave_Id, status } = req.body; 
 
-            if (!leaveId || !status) {
+            if (!leave_Id || !status) {
                 return res.status(400).json({ message: "Thiếu leaveId hoặc status (Approved/Rejected)" });
             }
 
             // Gọi Service để update Database
-            await ManagerService.updateLeaveStatus(leaveId, status);
+            await ManagerService.updateLeaveStatus(leave_Id, status);
 
             return res.status(200).json({
                 message: `Đã cập nhật trạng thái đơn nghỉ phép thành: ${status}`
