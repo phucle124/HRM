@@ -29,6 +29,7 @@ const getEmployeeById = async (req, res) => {
 
 // [POST] /api/employees - Tạo nhân viên mới
 const createEmployee = async (req, res) => {
+    console.log("Dữ liệu Render nhận được:", req.body);
     const { full_name, email, dob, gender, hide_date, position, department_id } = req.body;
     if (!full_name || !email || !dob || !gender || !hide_date|| !position || !department_id) {
         return res.status(400).json({ message: 'Vui lòng nhập đầy đủ thông tin.' });
