@@ -39,17 +39,19 @@ const getAllEmployees = async (searchQuery = '') => {
 }
 
 // 2. Tạo nhân viên mới (Xóa cache)
-const createEmployee = async (name, email, department_id) => {
+const createEmployee = async (name, email, dob, department_id) => {
+    const [day, month, year] = dob.split('/');
+    const formattedDob = `${year}-${month}-${day}`;
     const [results] = await connection.query(
-        'INSERT INTO employees (full_name, email, department_id) VALUES (?, ?, ?)',
-        [name, email, department_id]
+        'INSERT INTO employees (full_name, email, dob, department_id) VALUES (?, ?, ?, ?)',
+        [name, email, formattedDob, department_id]
     );
     
     // Dữ liệu thay đổi -> Xóa sạch các cache liên quan đến nhân viên
     await redisClient.del('employees:all_full');
     await redisClient.del('employees:all'); // Xóa luôn bên CRUDService cho đồng bộ
     
-    return { id: results.insertId, name, email, department_id };
+    return { id: results.insertId, name, email, dob: formattedDob, department_id };
 }
 
 // 3. Cập nhật thông tin nhân viên (Xóa cache)
