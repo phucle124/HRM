@@ -29,12 +29,12 @@ const getEmployeeById = async (req, res) => {
 
 // [POST] /api/employees - Tạo nhân viên mới
 const createEmployee = async (req, res) => {
-    const { name, email, dob, department_id } = req.body;
-    if (!name || !email || !dob || !department_id) {
+    const { name, email, dob, gender, hide_date, position, department_id } = req.body;
+    if (!name || !email || !dob || !gender || !hide_date|| !position || !department_id) {
         return res.status(400).json({ message: 'Vui lòng nhập đầy đủ thông tin.' });
     }
     try {
-        const newEmployee = await HRService.createEmployee(name, email, dob, department_id);
+        const newEmployee = await HRService.createEmployee(name, email, dob, gender, hide_date, position, department_id);
         return res.status(201).json({ message: 'Tạo nhân viên thành công', data: newEmployee });
     } catch (err) {
         return res.status(500).json({ message: "Lỗi server: " + err.message });
