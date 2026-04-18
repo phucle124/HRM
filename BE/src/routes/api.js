@@ -53,6 +53,18 @@ router.post('/employees', checkRole2(["hr"]), HRController.createEmployee);
 router.put('/employees/:id', checkRole2(["hr"]), HRController.updateEmployee);
 router.delete('/employees/:id', HRController.deleteEmployee);
 
+// --- API Quản lý Chấm công cho HR ---
+// 1. Lấy danh sách chấm công (có filter theo ngày/tháng/năm)
+router.get('/attendance', HRController.getAttendance);
+// 2. Cập nhật giờ công (dành cho HR sửa lỗi)
+router.put('/attendance/update/:id', HRController.updateAttendance);
+
+// Quản lý Khen thưởng - Kỷ luật
+router.get('/rewards-discipline', HRController.getRewardsDiscipline);
+router.post('/rewards-discipline/add', HRController.createRewardDiscipline);
+router.put('/rewards-discipline/update/:id', HRController.updateRewardDiscipline);
+router.delete('/rewards-discipline/delete/:id', HRController.deleteRewardDiscipline);
+
 // MANAGER
 
 router.get('/manager/staff-list', ManagerController.getStaffPage);
