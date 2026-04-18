@@ -88,10 +88,107 @@ const getEmployeeById = async (id) => {
     return results[0];
 }
 
+// 1. Lấy danh sách và tính toán tổng hợp
+const getAttendanceList = async (date, month, year) => {
+    let sql = `
+        SELECT a.*, e.full_name 
+        FROM attendance a 
+        JOIN employees e ON a.employee_id = e.employee_id 
+        WHERE 1=1
+    `;
+    const params = [];
+
+    if (date) {
+        sql += " AND a.date = ?";
+        params.push(date);
+    } else if (month && year) {
+        sql += " AND MONTH(a.date) = ? AND YEAR(a.date) = ?";
+        params.push(month, year);
+    }
+
+    const [rows] = await connection.query(sql, params);
+
+    // Logic Tổng hợp (Summary)
+    const summary = {};
+    rows.forEach(row => {
+        const empId = row.employee_id;
+        if (!summary[empId]) {
+            summary[empId] = { name: row.full_name, totalDays: 0, lateCount: 0, totalHours: 0 };
+        }
+
+        summary[empId].totalDays += 1;
+
+        // Giả định đi trễ sau 08:30:00
+        if (row.check_in > '08:30:00') {
+            summary[empId].lateCount += 1;
+        }
+
+        // Tính giờ làm (đơn giản hóa)
+        if (row.check_in && row.check_out) {
+            const hours = (new Date(`1970-01-01T${row.check_out}`) - new Date(`1970-01-01T${row.check_in}`)) / 3600000;
+            summary[empId].totalHours += parseFloat(hours.toFixed(2));
+        }
+    });
+
+    return { details: rows, summary: Object.values(summary) };
+};
+
+// 2. Cập nhật record
+const updateAttendanceRecord = async (id, check_in, check_out) => {
+    await connection.query(
+        'UPDATE attendance SET check_in = ?, check_out = ? WHERE attendance_id = ?',
+        [check_in, check_out, id]
+    );
+    return { attendance_id: id, check_in, check_out };
+};
+
+const getAllRewardsDiscipline = async () => {
+    const [rows] = await connection.query(`
+        SELECT rd.*, e.full_name 
+        FROM rewards_discipline rd 
+        JOIN employees e ON rd.employee_id = e.employee_id 
+        ORDER BY rd.date_recorded DESC
+    `);
+    return rows;
+};
+
+// 2. Thêm mới bản ghi
+const createRewardDiscipline = async (data) => {
+    const { employee_id, type, title, description, date_recorded } = data;
+    const [results] = await connection.query(
+        'INSERT INTO rewards_discipline (employee_id, type, title, description, date_recorded) VALUES (?, ?, ?, ?, ?)',
+        [employee_id, type, title, description, date_recorded]
+    );
+    return { record_id: results.insertId, ...data };
+};
+
+// 3. Cập nhật bản ghi
+const updateRewardDiscipline = async (id, data) => {
+    const { type, title, description, date_recorded } = data;
+    await connection.query(
+        'UPDATE rewards_discipline SET type = ?, title = ?, description = ?, date_recorded = ? WHERE record_id = ?',
+        [type, title, description, date_recorded, id]
+    );
+    return { record_id: id, ...data };
+};
+
+// 4. Xóa bản ghi
+const deleteRewardDiscipline = async (id) => {
+    await connection.query('DELETE FROM rewards_discipline WHERE record_id = ?', [id]);
+    return { message: "Xóa thành công", record_id: id };
+};
+
 module.exports = {
     getAllEmployees,
     getEmployeeById,
     createEmployee,
     updateEmployee,
-    deleteEmployee
+    deleteEmployee,
+    getAttendanceList,
+    updateAttendanceRecord,
+    getAllRewardsDiscipline,
+    createRewardDiscipline,
+    updateRewardDiscipline,
+    deleteRewardDiscipline
+
 }

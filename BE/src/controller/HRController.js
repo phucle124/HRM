@@ -31,7 +31,7 @@ const getEmployeeById = async (req, res) => {
 const createEmployee = async (req, res) => {
     console.log("Dữ liệu Render nhận được:", req.body);
     const { full_name, email, dob, gender, hire_date, position, department_id } = req.body;
-    if (!full_name || !email || !dob || !gender || !hire_date|| !position || !department_id) {
+    if (!full_name || !email || !dob || !gender || !hire_date || !position || !department_id) {
         return res.status(400).json({ message: 'Vui lòng nhập đầy đủ thông tin.' });
     }
     try {
@@ -46,7 +46,7 @@ const createEmployee = async (req, res) => {
 const updateEmployee = async (req, res) => {
     const employeeId = req.params.id;
     const { name, email, department_id } = req.body;
-     if (!name || !email || !department_id) {
+    if (!name || !email || !department_id) {
         return res.status(400).json({ message: 'Vui lòng nhập đầy đủ thông tin.' });
     }
     try {
@@ -121,9 +121,9 @@ const assignUserAccount = async (req, res) => {
             // Nếu gửi mail lỗi, vẫn coi như thành công ở phía gán user
             // nhưng trả về mã 207 để client biết có một phần không hoàn thành.
             console.error('Lỗi gửi mail nhưng đã gán user thành công:', mailError.message);
-            return res.status(207).json({ 
+            return res.status(207).json({
                 message: `Gán tài khoản cho nhân viên ID ${employeeId} thành công, nhưng gửi email thông báo thất bại.`,
-                error: mailError.message 
+                error: mailError.message
             });
         }
 
@@ -135,11 +135,91 @@ const assignUserAccount = async (req, res) => {
     }
 };
 
+// [GET] /api/attendance?month=04&year=2026 hoặc ?date=2026-04-18
+const getAttendance = async (req, res) => {
+    try {
+        const { date, month, year } = req.query;
+        // Gọi service để lấy dữ liệu đã qua xử lý
+        const data = await HRService.getAttendanceList(date, month, year);
+
+        return res.status(200).json({
+            message: "Lấy bảng công thành công",
+            summary: data.summary, // Chứa tổng hợp ngày công, trễ...
+            details: data.details  // Danh sách chi tiết từng dòng
+        });
+    } catch (err) {
+        return res.status(500).json({ message: "Lỗi Server: " + err.message });
+    }
+};
+
+// [PUT] /api/attendance/update/:id
+const updateAttendance = async (req, res) => {
+    const attendance_id = req.params.id;
+    const { check_in, check_out } = req.body;
+
+    if (!check_in || !check_out) {
+        return res.status(400).json({ message: "Vui lòng nhập đủ check_in và check_out" });
+    }
+
+    try {
+        const result = await HRService.updateAttendanceRecord(attendance_id, check_in, check_out);
+        return res.status(200).json({ message: "Cập nhật giờ công thành công", data: result });
+    } catch (err) {
+        return res.status(500).json({ message: "Lỗi Server: " + err.message });
+    }
+};
+
+// [GET] /api/rewards-discipline
+const getRewardsDiscipline = async (req, res) => {
+    try {
+        const data = await HRService.getAllRewardsDiscipline();
+        return res.status(200).json({ message: "Lấy danh sách thành công", data });
+    } catch (err) {
+        return res.status(500).json({ message: "Lỗi Server: " + err.message });
+    }
+};
+
+// [POST] /api/rewards-discipline/add
+const createRewardDiscipline = async (req, res) => {
+    try {
+        const result = await HRService.createRewardDiscipline(req.body);
+        return res.status(201).json({ message: "Thêm thành công", data: result });
+    } catch (err) {
+        return res.status(500).json({ message: "Lỗi Server: " + err.message });
+    }
+};
+
+// [PUT] /api/rewards-discipline/update/:id
+const updateRewardDiscipline = async (req, res) => {
+    try {
+        const result = await HRService.updateRewardDiscipline(req.params.id, req.body);
+        return res.status(200).json({ message: "Cập nhật thành công", data: result });
+    } catch (err) {
+        return res.status(500).json({ message: "Lỗi Server: " + err.message });
+    }
+};
+
+// [DELETE] /api/rewards-discipline/delete/:id
+const deleteRewardDiscipline = async (req, res) => {
+    try {
+        const result = await HRService.deleteRewardDiscipline(req.params.id);
+        return res.status(200).json(result);
+    } catch (err) {
+        return res.status(500).json({ message: "Lỗi Server: " + err.message });
+    }
+};
+
 module.exports = {
     getAllEmployees,
     getEmployeeById,
     createEmployee,
     updateEmployee,
     deleteEmployee,
-    assignUserAccount
+    assignUserAccount,
+    getAttendance,
+    updateAttendance,
+    getRewardsDiscipline,
+    createRewardDiscipline,
+    updateRewardDiscipline,
+    deleteRewardDiscipline
 }
