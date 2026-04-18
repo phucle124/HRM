@@ -64,6 +64,13 @@ router.get('/rewards-discipline', HRController.getRewardsDiscipline);
 router.post('/rewards-discipline/add', HRController.createRewardDiscipline);
 router.put('/rewards-discipline/update/:id', HRController.updateRewardDiscipline);
 router.delete('/rewards-discipline/delete/:id', HRController.deleteRewardDiscipline);
+// Quản lý lương
+router.get('/salary/calculate', HRController.getSalaryCalculation);
+router.post('/salary/save', HRController.saveSalary);
+// Quản lý nghỉ phép
+router.get('/leaves', HRController.getLeaves);
+router.put('/leaves/approve/:id', HRController.approveLeave);
+router.post('/leaves/request', HRController.requestLeave);
 
 // MANAGER
 

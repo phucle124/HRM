@@ -178,6 +178,92 @@ const deleteRewardDiscipline = async (id) => {
     return { message: "Xóa thành công", record_id: id };
 };
 
+// 1. Lấy số ngày công và tính lương dự kiến
+const calculateMonthlySalary = async (month, year) => {
+    // Lấy danh sách nhân viên kèm lương cơ bản và số ngày công trong tháng đó
+    const sql = `
+        SELECT e.employee_id, e.full_name, e.position, e.hire_date, 
+               COALESCE(count(a.attendance_id), 0) as work_days
+        FROM employees e
+        LEFT JOIN attendance a ON e.employee_id = a.employee_id 
+             AND MONTH(a.date) = ? AND YEAR(a.date) = ?
+        GROUP BY e.employee_id
+    `;
+    const [rows] = await connection.query(sql, [month, year]);
+    return rows;
+};
+
+// 2. Lưu hoặc cập nhật bảng lương
+const upsertSalary = async (salaryData) => {
+    const { employee_id, _month, _year, basic_salary, allowance, bonus, deduction, total_salary } = salaryData;
+    
+    // Kiểm tra xem đã có bản ghi lương cho tháng này chưa
+    const [exist] = await connection.query(
+        'SELECT salary_id FROM salary WHERE employee_id = ? AND _month = ? AND _year = ?',
+        [employee_id, _month, _year]
+    );
+
+    if (exist.length > 0) {
+        // Cập nhật
+        await connection.query(
+            'UPDATE salary SET basic_salary = ?, allowance = ?, bonus = ?, deduction = ?, total_salary = ? WHERE salary_id = ?',
+            [basic_salary, allowance, bonus, deduction, total_salary, exist[0].salary_id]
+        );
+        return { message: "Cập nhật bảng lương thành công", id: exist[0].salary_id };
+    } else {
+        // Thêm mới
+        const [result] = await connection.query(
+            'INSERT INTO salary (employee_id, _month, _year, basic_salary, allowance, bonus, deduction, total_salary) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
+            [employee_id, _month, _year, basic_salary, allowance, bonus, deduction, total_salary]
+        );
+        return { message: "Lưu bảng lương thành công", id: result.insertId };
+    }
+};
+
+// 1. Lấy danh sách đơn nghỉ và tính toán ngày còn lại ngay lập tức
+const getAllLeaveRequests = async () => {
+const sql = `
+    SELECT 
+        l.*, 
+        e.full_name, 
+        12 AS max_leave_days, -- Giả lập cột max_leave_days là 12
+        (
+            SELECT COALESCE(SUM(DATEDIFF(end_date, start_date) + 1), 0)
+            FROM leaves 
+            WHERE employee_id = e.employee_id AND status = 'Approved'
+        ) AS total_approved_days
+    FROM leaves l
+    JOIN employees e ON l.employee_id = e.employee_id
+    ORDER BY l.start_date DESC
+`;
+    
+    const [rows] = await connection.query(sql);
+    
+    // Tính toán số ngày còn lại theo công thức: Còn lại = Tối đa - Đã duyệt
+    return rows.map(row => ({
+        ...row,
+        remaining_days: row.max_leave_days - row.total_approved_days
+    }));
+};
+
+// 2. Duyệt/Từ chối đơn (Chỉ cập nhật trạng thái đơn nghỉ)
+const updateLeaveStatus = async (leave_id, status) => {
+    await connection.query(
+        'UPDATE leaves SET status = ? WHERE leave_id = ?',
+        [status, leave_id]
+    );
+    return { leave_id, status };
+};
+// 3. Nhân viên gửi đơn (Dành cho phần test luồng)
+const createLeaveRequest = async (data) => {
+    const { employee_id, leave_type, start_date, end_date} = data;
+    const [result] = await connection.query(
+        'INSERT INTO leaves (employee_id, leave_type, start_date, end_date) VALUES (?, ?, ?, ?)',
+        [employee_id, leave_type, start_date, end_date]
+    );
+    return { leave_id: result.insertId, ...data, status: 'Pending' };
+};
+
 module.exports = {
     getAllEmployees,
     getEmployeeById,
@@ -189,6 +275,10 @@ module.exports = {
     getAllRewardsDiscipline,
     createRewardDiscipline,
     updateRewardDiscipline,
-    deleteRewardDiscipline
-
+    deleteRewardDiscipline,
+    calculateMonthlySalary,
+    upsertSalary,
+    getAllLeaveRequests,
+    updateLeaveStatus,
+    createLeaveRequest
 }

@@ -209,6 +209,71 @@ const deleteRewardDiscipline = async (req, res) => {
     }
 };
 
+// [GET] /api/salary/calculate?month=4&year=2026
+const getSalaryCalculation = async (req, res) => {
+    try {
+        const { month, year } = req.query;
+        if (!month || !year) return res.status(400).json({ message: "Thiếu tháng hoặc năm" });
+
+        const data = await HRService.calculateMonthlySalary(month, year);
+        return res.status(200).json({
+            message: `Dữ liệu tính lương tháng ${month}/${year}`,
+            data: data
+        });
+    } catch (err) {
+        return res.status(500).json({ message: "Lỗi Server: " + err.message });
+    }
+};
+
+// [POST] /api/salary/save
+const saveSalary = async (req, res) => {
+    try {
+        const result = await HRService.upsertSalary(req.body);
+        return res.status(200).json(result);
+    } catch (err) {
+        return res.status(500).json({ message: "Lỗi Server: " + err.message });
+    }
+};
+
+// [GET] /api/leaves
+const getLeaves = async (req, res) => {
+    try {
+        const data = await HRService.getAllLeaveRequests();
+        return res.status(200).json({ 
+            message: "Lấy danh sách thành công", 
+            data 
+        });
+    } catch (err) {
+        return res.status(500).json({ message: "Lỗi Server: " + err.message });
+    }
+};
+
+// [PUT] /api/leaves/approve/:id
+const approveLeave = async (req, res) => {
+    const leave_id = req.params.id;
+    const { status } = req.body; // 'Approved' hoặc 'Rejected'
+
+    try {
+        const result = await HRService.updateLeaveStatus(leave_id, status);
+        return res.status(200).json({ 
+            message: `Đơn nghỉ đã được cập nhật thành: ${status}`, 
+            data: result 
+        });
+    } catch (err) {
+        return res.status(500).json({ message: "Lỗi Server: " + err.message });
+    }
+};
+
+// [POST] /api/leaves/request (Giả lập nhân viên gửi đơn)
+const requestLeave = async (req, res) => {
+    try {
+        const result = await HRService.createLeaveRequest(req.body);
+        res.status(201).json({ message: "Gửi yêu cầu nghỉ thành công", data: result });
+    } catch (err) {
+        res.status(500).json({ message: "Lỗi Server: " + err.message });
+    }
+};
+
 module.exports = {
     getAllEmployees,
     getEmployeeById,
@@ -221,5 +286,10 @@ module.exports = {
     getRewardsDiscipline,
     createRewardDiscipline,
     updateRewardDiscipline,
-    deleteRewardDiscipline
+    deleteRewardDiscipline,
+    getSalaryCalculation,
+    saveSalary,
+    getLeaves,
+    approveLeave,
+    requestLeave
 }
