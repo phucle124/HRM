@@ -97,7 +97,8 @@ const assignUserAccount = async (req, res) => {
         if (updateResult.affectedRows === 0) {
             return res.status(404).json({ message: `Không tìm thấy nhân viên với ID: ${employeeId}` });
         }
-
+        const userRole = role || 'employee'; 
+        await db.execute('UPDATE users SET role = ? WHERE id = ?', [userRole, userId]);
         // Bước 2: Lấy thông tin email và tên đầy đủ của nhân viên để gửi mail
         const [employeeInfo] = await db.execute(
             `SELECT e.full_name, e.email 

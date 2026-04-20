@@ -48,6 +48,10 @@ const updateDepartment = async (req, res) => {
     }
     try {
         await DepartmentService.updateDepartment(departmentId, name, manager_id);
+        if (manager_id) {
+            const db = require('../config/db'); // Đảm bảo đã import db
+            await db.execute('UPDATE users SET role = ? WHERE id = ?', ['manager', manager_id]);
+        }
         return res.status(200).json({ status: 'success', message: 'Cập nhật phòng ban thành công.' });
     } catch (err) {
         return res.status(500).json({ status: 'error', message: err.message });
