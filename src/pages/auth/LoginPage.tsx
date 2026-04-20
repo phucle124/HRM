@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/authContext';
+import { resolveEmployeeIdFromSources } from '../../lib/employeeUtils';
 
 export default function LoginPage() {
   const navigate = useNavigate();
@@ -21,7 +22,7 @@ export default function LoginPage() {
         headers: {
           'Content-Type': 'application/json',
         },
-        credentials: 'include', // Rất quan trọng: Bật tính năng nhận Cookie từ Server
+        credentials: 'include', // Bật tính năng nhận Cookie từ Server
         body: JSON.stringify({
           email: username,
           password: password,
@@ -29,32 +30,61 @@ export default function LoginPage() {
       });
 
       const data = await response.json();
-      console.log("Dữ liệu User từ Server:", data.data);
+      console.log("Dữ liệu User từ Server:", data.data); // Chụp dòng này cho BE xem
+      
       if (!response.ok) {
         setError(data.message || 'Sai tài khoản hoặc mật khẩu');
         setLoading(false);
         return;
       }
 
-      // ĐÃ SỬA: Chỉ lưu thông tin cơ bản, KHÔNG CẦN TOKEN NỮA
-      login({
+      // 1. Khởi tạo object user cơ bản từ dữ liệu Session BE trả về
+      const nextUser: any = {
         id: data.data.id,
         name: data.data.name,
-        email: username, // Dùng username người dùng nhập vào
-        role: data.data.role,
-      });
+        email: username,
+        role: data.data.role, // FE CHỈ ĐỌC ROLE TỪ SESSION BE TRẢ VỀ
+      };
 
-      // Điều hướng theo Role
-      if (data.data.role === 'admin') navigate('/admin/dashboard');
-      else if (data.data.role === 'hr') navigate('/hr');
-      else if (data.data.role === 'manager') navigate('/manager/dashboard');
+      // 2. Tự động map Profile / Employee ID (RẤT QUAN TRỌNG ĐỂ KHÔNG BỊ LỖI TRẮNG HỒ SƠ)
+      if (['employee', 'manager', 'hr'].includes(nextUser.role)) {
+        try {
+          const resolvedEmployeeId = await resolveEmployeeIdFromSources({
+            userId: nextUser.id,
+            email: username,
+            name: nextUser.name,
+          });
+
+          if (resolvedEmployeeId) {
+            nextUser.employeeId = resolvedEmployeeId;
+            nextUser.profileUserId = resolvedEmployeeId;
+          }
+        } catch (err) {
+          console.warn("Không thể tự động map profile ID", err);
+        }
+      }
+
+      // 3. ÉP KIỂU (HARDCODE) QUYỀN MANAGER ĐỂ TEST UI
+      // Thêm cả email thật của bạn vào để test cho chắc chắn
+      //if (username === 'abc@gmail.com' || username === 'dh52201235@student.stu.edu.vn' || nextUser.name === 'Lê Anh Đức') {
+       // nextUser.role = 'manager';
+       // console.log(`🔥 Đã ép quyền Manager thành công cho tài khoản: ${username} để test UI!`);
+      //}
+
+      // 4. Lưu toàn bộ thông tin vào Context
+      login(nextUser);
+
+      // 5. Điều hướng theo Role (Chỉ để 1 lần ở cuối cùng)
+      if (nextUser.role === 'admin') navigate('/admin/dashboard');
+      else if (nextUser.role === 'hr') navigate('/hr');
+      else if (nextUser.role === 'manager') navigate('/manager/dashboard'); 
       else navigate('/employee');
 
     } catch (err) {
       setError('Không kết nối được server');
+    } finally {
+      setLoading(false);
     }
-
-    setLoading(false);
   };
 
   return (
@@ -75,7 +105,6 @@ export default function LoginPage() {
         )}
 
         <div className="space-y-5">
-
           <div>
             <label className="block text-sm font-semibold text-gray-700 mb-2">
               Email
@@ -103,7 +132,7 @@ export default function LoginPage() {
           <button
             onClick={handleLogin}
             disabled={loading}
-            className="w-full bg-blue-600 text-white py-3 rounded-2xl font-semibold hover:bg-blue-700 transition"
+            className="w-full bg-blue-600 text-white py-3 rounded-2xl font-semibold hover:bg-blue-700 transition disabled:opacity-60"
           >
             {loading ? 'Đang đăng nhập...' : 'Đăng nhập'}
           </button>

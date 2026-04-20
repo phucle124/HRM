@@ -1,72 +1,199 @@
-import { useState } from 'react';
-import { Card, EmployeeChip, Modal, PageTitle, PrimaryButton, SecondaryButton, Select, StatusBadge, SummaryCard, Table } from '../../components/ui';
-import { useAppData } from '../../context/dataContext';
+import { useEffect, useMemo, useState } from 'react';
+import { Card, EmployeeChip, InlineMessage, PageTitle, SummaryCard, Table } from '../../components/ui';
+import { fetchApi, formatApiError } from '../../lib/api';
+import { unwrapApiArray, formatDisplayDate } from '../../lib/employeeUtils';
 
-function downloadAttendance(content: string) {
-  const blob = new Blob([content], { type: 'text/plain;charset=utf-8;' });
-  const url = URL.createObjectURL(blob);
-  const anchor = document.createElement('a');
-  anchor.href = url;
-  anchor.download = 'bao-cao-cham-cong.txt';
-  anchor.click();
-  URL.revokeObjectURL(url);
+interface EmployeeRow {
+  id: number;
+  name: string;
+  email: string;
+  department_name?: string;
 }
 
-export default function AttendancePage() {
-  const { attendanceRecords, employees } = useAppData();
-  const [isOpen, setOpen] = useState(false);
-  const [reportType, setReportType] = useState('Trong ngày');
-  const totalPresent = attendanceRecords.filter((item) => item.status !== 'Nghỉ phép').length;
-  const totalLate = attendanceRecords.filter((item) => item.status === 'Đi muộn').length;
-  const remote = attendanceRecords.filter((item) => item.status === 'Làm từ xa').length;
+interface AttendanceRow {
+  attendance_id?: number;
+  id?: number;
+  employee_id?: number;
+  employeeId?: number;
+  full_name?: string;
+  status?: string;
+  check_in?: string;
+  checkIn?: string;
+  check_out?: string;
+  checkOut?: string;
+  created_at?: string;
+  date?: string;
+}
 
-  const preview = `Báo cáo chấm công - ${reportType}\nĐi làm hôm nay: ${totalPresent}\nĐi muộn: ${totalLate}\nLàm từ xa: ${remote}`;
+interface AttendanceSummaryRow {
+  name?: string;
+  full_name?: string;
+  totalDays?: number;
+  lateCount?: number;
+  totalHours?: number;
+}
+
+const initials = (name: string) =>
+  name.trim().split(/\s+/).slice(-2).map((part) => part[0]?.toUpperCase() || '').join('') || 'NV';
+
+export default function AttendancePage() {
+  const today = new Date();
+  const [employees, setEmployees] = useState<EmployeeRow[]>([]);
+  const [attendanceRows, setAttendanceRows] = useState<AttendanceRow[]>([]);
+  const [summaryRows, setSummaryRows] = useState<AttendanceSummaryRow[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+  const [month, setMonth] = useState(String(today.getMonth() + 1).padStart(2, '0'));
+  const [year, setYear] = useState(String(today.getFullYear()));
+  const [date, setDate] = useState('');
+
+  useEffect(() => {
+    const load = async () => {
+      try {
+        setLoading(true);
+        setError('');
+
+        const employeeResponse = await fetchApi<any>('/employees');
+        setEmployees(unwrapApiArray<EmployeeRow>(employeeResponse));
+
+        // Ưu tiên gọi API chấm công có filter để bám đúng backend.
+        const query = date ? `date=${date}` : `month=${month}&year=${year}`;
+        const attendanceResponse = await fetchApi<any>(`/attendance?${query}`);
+        const details = Array.isArray(attendanceResponse?.details)
+          ? attendanceResponse.details
+          : unwrapApiArray<AttendanceRow>(attendanceResponse);
+        const summary = Array.isArray(attendanceResponse?.summary)
+          ? attendanceResponse.summary
+          : [];
+
+        setAttendanceRows(details as AttendanceRow[]);
+        setSummaryRows(summary as AttendanceSummaryRow[]);
+      } catch (err) {
+        setEmployees([]);
+        setAttendanceRows([]);
+        setSummaryRows([]);
+        setError(formatApiError(err, 'Không tải được bảng chấm công'));
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    load();
+  }, [date, month, year]);
+
+  const latestByEmployee = useMemo(() => {
+    const map = new Map<number, AttendanceRow[]>();
+
+    attendanceRows.forEach((item) => {
+      const employeeId = Number(item.employee_id ?? item.employeeId);
+      if (!employeeId) return;
+
+      const current = map.get(employeeId) || [];
+      current.push(item);
+      map.set(employeeId, current);
+    });
+
+    return map;
+  }, [attendanceRows]);
+
+
+  const tableRows = useMemo(() => {
+    return employees.map((item) => {
+      const rows = latestByEmployee.get(item.id) || [];
+      const latest = [...rows].sort((a, b) => {
+        const aTime = new Date(a.created_at || a.date || a.check_in || a.checkIn || 0).getTime();
+        const bTime = new Date(b.created_at || b.date || b.check_in || b.checkIn || 0).getTime();
+        return bTime - aTime;
+      })[0];
+
+      return {
+        ...item,
+        latest,
+      };
+    });
+  }, [employees, latestByEmployee]);
 
   return (
     <div className="space-y-6">
-      <PageTitle title="Chấm công" subtitle="Theo dõi check-in, check-out và trạng thái làm việc hằng ngày." action={<PrimaryButton onClick={() => setOpen(true)}>Xuất báo cáo</PrimaryButton>} />
-      <div className="grid gap-5 md:grid-cols-3">
-        <SummaryCard label="Đi làm hôm nay" value={String(totalPresent)} change="Nhân sự có mặt tại hệ thống" accent="bg-brand-soft" />
-        <SummaryCard label="Đi muộn" value={String(totalLate)} change="Cần nhắc nhở hoặc điều chỉnh" accent="bg-amber-50" />
-        <SummaryCard label="Làm từ xa" value={String(remote)} change="Đã ghi nhận online" accent="bg-[#f1ebe4]" />
-      </div>
-      <Card title="Nhật ký chấm công" subtitle="Dữ liệu chấm công trong ngày 19/03/2026">
-        <Table columns={['Nhân viên', 'Ngày', 'Check in', 'Check out', 'Số giờ', 'Trạng thái']}>
-          {attendanceRecords.map((item) => {
-            const employee = employees.find((entry) => entry.id === item.employeeId);
-            return (
-              <tr key={item.id}>
-                <td className="px-5 py-4"><EmployeeChip name={item.employeeName} detail={`ID ${item.employeeId}`} avatar={employee?.avatar ?? item.employeeName.slice(0, 2).toUpperCase()} avatarUrl={employee?.avatarUrl} compact /></td>
-                <td className="px-5 py-4">{item.date}</td>
-                <td className="px-5 py-4">{item.checkIn}</td>
-                <td className="px-5 py-4">{item.checkOut}</td>
-                <td className="px-5 py-4">{item.hours.toFixed(1)}h</td>
-                <td className="px-5 py-4"><StatusBadge status={item.status} /></td>
-              </tr>
-            );
-          })}
-        </Table>
-      </Card>
+      <PageTitle
+        title="Chấm công nhân viên"
+        subtitle="Theo dõi danh sách nhân viên và trạng thái dữ liệu chấm công."
+      />
 
-      <Modal open={isOpen} onClose={() => setOpen(false)} title="Xuất báo cáo chấm công" description="Tải nhanh một file báo cáo demo từ giao diện FE">
-        <div className="space-y-4">
-          <Select
-            label="Loại báo cáo"
-            value={reportType}
-            onChange={setReportType}
-            options={[
-              { label: 'Trong ngày', value: 'Trong ngày' },
-              { label: 'Theo tuần', value: 'Theo tuần' },
-              { label: 'Theo tháng', value: 'Theo tháng' },
-            ]}
-          />
-          <div className="rounded-2xl bg-[#f7f2ec] p-4 text-sm text-stone-700 ring-1 ring-line whitespace-pre-line">{preview}</div>
+      {error ? <InlineMessage>{error}</InlineMessage> : null}
+
+      <div className="flex flex-col gap-3 rounded-2xl bg-white p-4 ring-1 ring-line md:flex-row md:items-end">
+        <div className="grid gap-3 md:grid-cols-3">
+          <div>
+            <label className="mb-2 block text-sm font-medium text-stone-700">Ngày</label>
+            <input
+              type="date"
+              value={date}
+              onChange={(e) => setDate(e.target.value)}
+              className="w-full rounded-2xl border border-line px-4 py-3 outline-none"
+            />
+          </div>
+          <div>
+            <label className="mb-2 block text-sm font-medium text-stone-700">Tháng</label>
+            <input
+              type="number"
+              min="1"
+              max="12"
+              value={month}
+              onChange={(e) => setMonth(e.target.value)}
+              className="w-full rounded-2xl border border-line px-4 py-3 outline-none"
+            />
+          </div>
+          <div>
+            <label className="mb-2 block text-sm font-medium text-stone-700">Năm</label>
+            <input
+              type="number"
+              value={year}
+              onChange={(e) => setYear(e.target.value)}
+              className="w-full rounded-2xl border border-line px-4 py-3 outline-none"
+            />
+          </div>
         </div>
-        <div className="mt-6 flex justify-end gap-3">
-          <SecondaryButton onClick={() => setOpen(false)}>Đóng</SecondaryButton>
-          <PrimaryButton onClick={() => downloadAttendance(preview)}>Xuất file</PrimaryButton>
-        </div>
-      </Modal>
+      </div>
+
+     
+
+      <Card title="Danh sách nhân viên">
+        {loading ? (
+          <InlineMessage>Đang tải dữ liệu chấm công...</InlineMessage>
+        ) : (
+          <Table columns={['Nhân viên', 'Email', 'Phòng ban', 'Lần chấm gần nhất', 'Trạng thái']}>
+            {tableRows.length === 0 ? (
+              <tr>
+                <td colSpan={5} className="px-5 py-8 text-center text-stone-500">
+                  Chưa có dữ liệu chấm công phù hợp bộ lọc.
+                </td>
+              </tr>
+            ) : (
+              tableRows.map((item) => (
+                <tr key={item.id}>
+                  <td className="px-5 py-4">
+                    <EmployeeChip
+                      name={item.name}
+                      detail={`#${item.id}`}
+                      avatar={initials(item.name)}
+                      compact
+                    />
+                  </td>
+                  <td className="px-5 py-4">{item.email}</td>
+                  <td className="px-5 py-4">{item.department_name || 'Chưa phân phòng ban'}</td>
+                  <td className="px-5 py-4">{formatDisplayDate(item.latest?.check_in || item.latest?.checkIn || item.latest?.created_at || item.latest?.date)}</td>
+                  <td className="px-5 py-4">
+                    <span className="rounded-full bg-stone-100 px-3 py-1 text-xs font-medium text-stone-700">
+                      {item.latest?.status || 'Chưa có'}
+                    </span>
+                  </td>
+                </tr>
+              ))
+            )}
+          </Table>
+        )}
+      </Card>
     </div>
   );
 }
