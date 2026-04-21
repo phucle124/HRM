@@ -19,18 +19,12 @@ export default function LoginPage() {
     try {
       const response = await fetch('https://hrm-phkz.onrender.com/login', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        credentials: 'include', // Bật tính năng nhận Cookie từ Server
-        body: JSON.stringify({
-          email: username,
-          password: password,
-        }),
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include', // Để nhận và lưu Cookie từ Server
+        body: JSON.stringify({ email: username, password: password }),
       });
 
       const data = await response.json();
-      console.log("Dữ liệu User từ Server:", data.data); // Chụp dòng này cho BE xem
       
       if (!response.ok) {
         setError(data.message || 'Sai tài khoản hoặc mật khẩu');
@@ -38,15 +32,22 @@ export default function LoginPage() {
         return;
       }
 
-      // 1. Khởi tạo object user cơ bản từ dữ liệu Session BE trả về
+      // 1. Lấy thông tin user từ data.data
+      const userData = data.data;
+
+      // 2. Tạo object user và ưu tiên nhận diện Manager ngay lập tức
+      // Dựa trên cột isManager mà BE mới bổ sung
       const nextUser: any = {
-        id: data.data.id,
-        name: data.data.name,
+        id: userData.id,
+        name: userData.name,
         email: username,
-        role: data.data.role, // FE CHỈ ĐỌC ROLE TỪ SESSION BE TRẢ VỀ
+        // Nếu BE báo isManager=true, ép role sang 'manager' để App.tsx mở Route Manager
+        role: userData.isManager ? 'manager' : (userData.role || 'employee'), 
+        token: data.token || userData.token,
+        isManager: !!userData.isManager
       };
 
-      // 2. Tự động map Profile / Employee ID (RẤT QUAN TRỌNG ĐỂ KHÔNG BỊ LỖI TRẮNG HỒ SƠ)
+      // 3. Tự động map Profile / Employee ID
       if (['employee', 'manager', 'hr'].includes(nextUser.role)) {
         try {
           const resolvedEmployeeId = await resolveEmployeeIdFromSources({
@@ -64,17 +65,10 @@ export default function LoginPage() {
         }
       }
 
-      // 3. ÉP KIỂU (HARDCODE) QUYỀN MANAGER ĐỂ TEST UI
-      // Thêm cả email thật của bạn vào để test cho chắc chắn
-      //if (username === 'abc@gmail.com' || username === 'dh52201235@student.stu.edu.vn' || nextUser.name === 'Lê Anh Đức') {
-       // nextUser.role = 'manager';
-       // console.log(`🔥 Đã ép quyền Manager thành công cho tài khoản: ${username} để test UI!`);
-      //}
-
-      // 4. Lưu toàn bộ thông tin vào Context
+      // 4. Lưu vào Context (Hàm login sẽ lưu tiếp vào LocalStorage cho bạn)
       login(nextUser);
 
-      // 5. Điều hướng theo Role (Chỉ để 1 lần ở cuối cùng)
+      // 5. Điều hướng theo Role đã được cập nhật
       if (nextUser.role === 'admin') navigate('/admin/dashboard');
       else if (nextUser.role === 'hr') navigate('/hr');
       else if (nextUser.role === 'manager') navigate('/manager/dashboard'); 
@@ -90,7 +84,6 @@ export default function LoginPage() {
   return (
     <div className="min-h-screen flex items-center justify-center bg-[#f8f5f1] px-4">
       <div className="w-full max-w-lg bg-white rounded-[30px] shadow-xl p-10 border border-gray-200">
-
         <div className="text-center mb-8">
           <h1 className="text-3xl font-bold text-gray-900">Đăng nhập hệ thống</h1>
           <p className="text-sm text-gray-500 mt-2">
@@ -114,6 +107,7 @@ export default function LoginPage() {
               value={username}
               onChange={(e) => setUsername(e.target.value)}
               className="w-full rounded-2xl border border-gray-200 px-4 py-3 outline-none focus:ring-2 focus:ring-blue-400"
+              placeholder="nhanvien@congty.com"
             />
           </div>
 
@@ -126,6 +120,7 @@ export default function LoginPage() {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               className="w-full rounded-2xl border border-gray-200 px-4 py-3 outline-none focus:ring-2 focus:ring-blue-400"
+              placeholder="••••••••"
             />
           </div>
 
@@ -139,7 +134,7 @@ export default function LoginPage() {
         </div>
 
         <p className="mt-5 text-center text-sm text-gray-500">
-          Đăng nhập bằng tài khoản có trong database
+          Đăng nhập bằng tài khoản có trong hệ thống HRM
         </p>
       </div>
     </div>

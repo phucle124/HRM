@@ -1,15 +1,15 @@
 import React, { createContext, useContext, useEffect, useState, useMemo, ReactNode } from 'react';
-import { fetchApi } from '../lib/api';
-import { resolveEmployeeIdFromSources } from '../lib/employeeUtils';
+import type { Role } from '../types/hrm';
+
 const BASE_URL = 'https://hrm-phkz.onrender.com';
 
 interface AuthUser {
   id: number;
   name: string;
-  email?: string; // ✅ Thêm dấu ? ở đây
-  role: string;
-  departmentName?: string;
-  token?: string,
+  email?: string;
+  role: Role; // Sử dụng type Role từ hrm.ts
+  token?: string;
+  isManager: boolean; // Bắt buộc có để nhận diện từ BE
 }
 
 interface AuthContextValue {
@@ -24,27 +24,38 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<AuthUser | null>(null);
   const [loading, setLoading] = useState(true);
 
-  // Tự động kiểm tra Cookie mỗi khi vào web
+  // Tự động kiểm tra Session mỗi khi vào web
   useEffect(() => {
     const checkSession = async () => {
       try {
         const res = await fetch(`${BASE_URL}/session`, {
           method: 'GET',
-          credentials: 'include', // Mang Cookie lên hỏi Backend
+          credentials: 'include', // Quan trọng: Gửi Cookie lên BE
         });
         
         if (res.ok) {
           const data = await res.json();
-          // Lấy thông tin user từ session
           const userData = data.data || data; 
-          setUser({
-  id: userData.id,
-  name: userData.name,
-  email: userData.email, // ✅ Thêm dòng này vào
-  role: userData.role,
-});
+
+          // Logic nhận diện Manager từ cột isManager của BE
+          const isManager = userData.isManager === true;
+          
+          const nextUser: AuthUser = {
+            id: userData.id,
+            name: userData.name,
+            email: userData.email,
+            // Nếu là manager thì ép role về 'manager' để App.tsx điều hướng đúng
+            role: isManager ? 'manager' : (userData.role as Role),
+            token: userData.token,
+            isManager: isManager,
+          };
+
+          setUser(nextUser);
+          // Cập nhật lại LocalStorage để dữ liệu luôn mới nhất
+          window.localStorage.setItem('hrm-demo-user', JSON.stringify(nextUser));
         } else {
           setUser(null);
+          window.localStorage.removeItem('hrm-demo-user');
         }
       } catch (error) {
         console.error('Lỗi khi kiểm tra session:', error);
@@ -61,16 +72,23 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     () => ({
       user,
       login: (nextUser: AuthUser) => {
-  setUser(nextUser);
-  // Vẫn lưu vào máy để khi F5 không bị mất trạng thái đăng nhập
-  window.localStorage.setItem('hrm-demo-user', JSON.stringify(nextUser));
-},
-      logout: () => setUser(null), // Có thể thêm API gọi /logout để Backend xóa Cookie nếu cần
+        // Trước khi login, kiểm tra lại role manager lần cuối
+        const finalUser = {
+          ...nextUser,
+          role: nextUser.isManager ? 'manager' : nextUser.role
+        };
+        setUser(finalUser as AuthUser);
+        window.localStorage.setItem('hrm-demo-user', JSON.stringify(finalUser));
+      },
+      logout: () => {
+        setUser(null);
+        window.localStorage.removeItem('hrm-demo-user'); // Xóa sạch dấu vết
+        // Nếu cần gọi API xóa session ở BE: fetch(`${BASE_URL}/logout`, { credentials: 'include' });
+      },
     }),
     [user]
   );
 
-  // Hiện chữ loading trong lúc chờ Backend trả lời để tránh giật trang
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-[#f8f5f1] text-gray-500 font-medium animate-pulse">

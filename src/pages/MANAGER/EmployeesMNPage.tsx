@@ -14,15 +14,10 @@ interface Employee {
   avatar?: string;
 }
 
-// ==========================================
-// BỘ DỮ LIỆU GIẢ (MOCK DATA) DÀNH RIÊNG CHO FRONT-END
-// Để dùng tạm khi Back-end chưa fix xong API
-// ==========================================
+// Mock Data dùng khi API rỗng hoặc lỗi
 const MOCK_EMPLOYEES: Employee[] = [
   { id: 101, name: "Trần Thu Hà", email: "ha.thu@hrm.vn", department_name: "Tài chính", position: "Chuyên viên Kế toán", status: "Đang làm", avatar: "TH" },
-  { id: 102, name: "Nguyễn Minh Khang", email: "khang.nm@hrm.vn", department_name: "Tài chính", position: "Nhân viên Kiểm toán", status: "Đang làm", avatar: "MK" },
-  { id: 103, name: "Lê Hoàng Yến", email: "yen.lh@hrm.vn", department_name: "Tài chính", position: "Thực tập sinh", status: "Thử việc", avatar: "HY" },
-  { id: 104, name: "Phạm Văn Long", email: "long.pv@hrm.vn", department_name: "Tài chính", position: "Chuyên viên Thuế", status: "Nghỉ phép", avatar: "VL" }
+  { id: 102, name: "Nguyễn Minh Khang", email: "khang.nm@hrm.vn", department_name: "Tài chính", position: "Nhân viên Kiểm toán", status: "Đang làm", avatar: "MK" }
 ];
 
 export default function EmployeesMNPage() {
@@ -30,34 +25,34 @@ export default function EmployeesMNPage() {
   const [employees, setEmployees] = useState<Employee[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
-  
-  // Biến này để báo cho người dùng biết đang xài dữ liệu thật hay giả (tùy chọn hiển thị)
-  const [isUsingMock, setIsUsingMock] = useState(false); 
+  const [isUsingMock, setIsUsingMock] = useState(false);
 
   useEffect(() => {
     const fetchStaff = async () => {
-      if (!user) return;
+      // Chỉ Manager mới có quyền xem danh sách này dựa trên API route bạn gửi
+      if (!user || user.role !== 'manager') return;
+
       try {
         setLoading(true);
+        // Sử dụng API dành riêng cho Manager để lấy nhân viên cấp dưới
         const res = await fetch(`${BASE_URL}/manager/staff-list`, {
           method: 'GET',
-          credentials: 'include',
+          credentials: 'include', // Quan trọng để Backend nhận diện Manager qua Cookie/Session
         });
 
         const result = await res.json();
         
-        // Nếu API lỗi (404, 500) HOẶC trả về mảng rỗng (Acc manager mới chưa có dữ liệu)
-        const dataList = Array.isArray(result) ? result : (Array.isArray(result.data) ? result.data : []);
+        // Backend của bạn thường bọc dữ liệu trong result.data
+        const dataList = result.data || (Array.isArray(result) ? result : []);
         
         if (!res.ok || dataList.length === 0) {
-          throw new Error('Fallback to mock data'); // Cố tình quăng lỗi để nhảy xuống catch
+          throw new Error('API rỗng hoặc lỗi');
         }
 
         setEmployees(dataList);
         setIsUsingMock(false);
-      } catch (err: any) {
-        console.warn("API lỗi hoặc rỗng, tự động kích hoạt Mock Data cho Front-end Demo.");
-        // Gán dữ liệu giả để giao diện vẫn hiển thị đẹp
+      } catch (err) {
+        console.warn("Đang sử dụng dữ liệu giả (Mock Data) do API chưa trả về kết quả.");
         setEmployees(MOCK_EMPLOYEES);
         setIsUsingMock(true);
       } finally {
@@ -68,9 +63,11 @@ export default function EmployeesMNPage() {
     fetchStaff();
   }, [user]);
 
+  // Logic lọc tại Front-end (Client-side filtering)
   const filteredEmployees = useMemo(() => {
     return employees.filter(emp => 
-      (emp.name || '').toLowerCase().includes(searchTerm.toLowerCase())
+      (emp.name || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (emp.email || '').toLowerCase().includes(searchTerm.toLowerCase())
     );
   }, [employees, searchTerm]);
 
@@ -82,35 +79,43 @@ export default function EmployeesMNPage() {
       : (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
   };
 
-  if (loading) return <div className="p-8 text-center animate-pulse text-stone-500">Đang tải dữ liệu...</div>;
+  if (loading) return <div className="p-8 text-center animate-pulse text-stone-500">Đang tải danh sách nhân viên...</div>;
 
   return (
     <div className="space-y-6">
       <PageTitle 
         title="Nhân viên phòng ban" 
-        subtitle={user?.departmentName ? `Phòng ban: ${user.departmentName}` : "Quản lý nhân sự cấp dưới"} 
+        subtitle={isUsingMock ? "Chế độ xem thử (Dữ liệu mẫu)" : `Quản lý nhân sự cấp dưới`} 
       />
 
-      <Card title={`Thành viên phòng ban (${employees.length})`}>
-        <div className="mb-6 max-w-md">
-          <Input
-            placeholder="Tìm kiếm theo tên..."
-            value={searchTerm}
-            onChange={(val) => setSearchTerm(val)}
-          />
+      <Card title={`Thành viên (${filteredEmployees.length})`}>
+        <div className="mb-6 flex flex-wrap gap-4 items-center justify-between">
+          <div className="w-full max-w-md">
+            <Input
+              placeholder="Tìm theo tên hoặc email..."
+              value={searchTerm}
+              onChange={(val) => setSearchTerm(val)}
+            />
+          </div>
+          {isUsingMock && (
+            <span className="text-xs bg-amber-100 text-amber-700 px-3 py-1 rounded-full font-medium">
+              Dữ liệu Demo
+            </span>
+          )}
         </div>
 
-        <Table columns={['Nhân viên', 'Vị trí', 'Trạng thái']}>
+        <Table columns={['Nhân viên', 'Phòng ban', 'Vị trí', 'Trạng thái']}>
           {filteredEmployees.length > 0 ? (
             filteredEmployees.map((emp) => (
-              <tr key={emp.id} className="hover:bg-[#f6efe7]/40 transition-colors">
+              <tr key={emp.id} className="hover:bg-stone-50 transition-colors">
                 <td className="px-5 py-4">
                   <EmployeeChip 
-                    name={emp.name || "N/A"} 
-                    detail={emp.email || "Không có email"} 
+                    name={emp.name} 
+                    detail={emp.email} 
                     avatar={emp.avatar || getInitials(emp.name)} 
                   />
                 </td>
+                <td className="px-5 py-4 text-stone-600">{emp.department_name || 'N/A'}</td>
                 <td className="px-5 py-4 font-medium text-stone-900">{emp.position || 'Nhân viên'}</td>
                 <td className="px-5 py-4">
                   <StatusBadge status={emp.status || 'Đang làm'} />
@@ -119,8 +124,8 @@ export default function EmployeesMNPage() {
             ))
           ) : (
             <tr>
-              <td colSpan={3} className="px-5 py-12 text-center text-stone-500 italic">
-                Không tìm thấy nhân viên nào.
+              <td colSpan={4} className="px-5 py-12 text-center text-stone-500 italic">
+                Không tìm thấy nhân viên nào khớp với từ khóa.
               </td>
             </tr>
           )}
