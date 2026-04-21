@@ -1,3 +1,6 @@
+const e = require("express");
+const { checkManager } = require("../services/CRUDService");
+
 const checkRole = (req,res,next)=>{
     if (!req.session || !req.session.user) {
         return res.status(401).json({message: "Phiên đăng nhập không khả dụng."});
@@ -30,4 +33,21 @@ const checkRole2 = (allowedRoles) => {
     };
 };
 
-module.exports = checkRole2;
+const isManager = ()=>{
+    return async (req,res,next)=>{
+        if (!req.session || !req.session.user) {
+            return res.status(401).json({ message: "Chưa đăng nhập" });
+        }
+
+        const userId = req.session.user.id;
+        let Manager = await checkManager(userId);
+        if(!Manager || Manager.length === 0) return res.status(403).json({ message: "Không phải manager" });
+        
+        next();
+    };
+};
+
+module.exports = {
+    checkRole2,
+    isManager,
+};

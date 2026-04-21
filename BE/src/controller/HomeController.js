@@ -1,8 +1,9 @@
 
+const { isManager } = require('../middlewares/Authorize');
 const {login} = require('../services/AuthenticateService');
 
 
-const {AllUsersData ,UserByIdData, CreateUser, UpdateUser, DeleteUser, LockUser, AllDepartmentsData, DepartmentByIdData, EditDepartment, DeleteDepartment, CreateDepartment, EmployeeByIdData, Employees_ByDepartmentId, Manager_BydepartmentId, Manager_ByDepartmentId, Assign_Manager, AllAttendancesData} = require('../services/CRUDService')
+const {AllUsersData ,UserByIdData, CreateUser, UpdateUser, DeleteUser, LockUser, AllDepartmentsData, DepartmentByIdData, EditDepartment, DeleteDepartment, CreateDepartment, EmployeeByIdData, Employees_ByDepartmentId, Manager_BydepartmentId, Manager_ByDepartmentId, Assign_Manager, AllAttendancesData, checkManager} = require('../services/CRUDService')
 
 
 
@@ -69,11 +70,14 @@ const LoginHandle = async (req,res) =>{
 
         if(dataUser.is_lock) return res.status(403).json({message: "Tài khoản đã bị khóa"});
 
+        let manager = await checkManager(dataUser.id);
+
         // LƯU VÀO SESSION 
         req.session.user = {
             id: dataUser.id,
             name: dataUser.name,
-            role: dataUser.role 
+            role: dataUser.role,
+            isManager: manager.length > 0
         };
         
 

@@ -13,9 +13,8 @@ const {
     assignManager
 } = require('../controller/HomeController');
 const { validateEmail, validatePassword, validatePhone } = require('../middlewares/validate');
-const checkRole = require('../middlewares/Authorize');
 const { Assign_Manager } = require('../services/CRUDService');
-const checkRole2 = require('../middlewares/Authorize');
+const {checkRole2, isManager, } = require('../middlewares/Authorize');
 
 
 // --- DANH SÁCH API ---
@@ -57,14 +56,14 @@ router.delete('/employees/:id', HRController.deleteEmployee);
 
 router.get('/manager/staff-list', ManagerController.getStaffPage);
 
-router.post('/manager/approve-leave', ManagerController.approveLeave);
+//router.post('/manager/approve-leave', ManagerController.approveLeave);
 
 
 //Employee
 
 router.get('/employee/profile/:id', EmployeeController.getProfile);
 
-router.post('/employee/check-in', EmployeeController.checkIn);
+//router.post('/employee/check-in', EmployeeController.checkIn);
 
 router.get('/employee/salary/:id', EmployeeController.getSalary);
 

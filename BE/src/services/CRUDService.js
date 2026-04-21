@@ -13,6 +13,17 @@ const AllUsersData = async () => {
     return results;
 }
 
+const checkManager = async (userId)=>{
+    const [results,fields] = await connection.query(`
+    SELECT e.employee_id
+    FROM departments d
+    JOIN employees e ON e.employee_id = d.manager_id
+    WHERE e.user_id = ?
+    `,[userId]);
+
+    return results;
+}
+
 const AllDepartmentsData = async () => {
     const cacheKey = 'depts:all';
     const cached = await redisClient.get(cacheKey);
@@ -158,5 +169,5 @@ module.exports = {
     AllEmployeesData, EmployeeByIdData, Assign_Manager, AllManagersData,
     Manager_ByDepartmentId, Employees_ByDepartmentId,
     
-    
+    checkManager
 }
