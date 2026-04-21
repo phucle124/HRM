@@ -113,8 +113,7 @@ const CreateDepartment = async (department_Name) => {
 const EditDepartment = async (departmentId, departmentName, ManagerId) => {
     const [results,fields] = await connection.query(`
         UPDATE departments SET name = ?, manager_id = ? WHERE department_id = ?
-        AND (NOT (name <=> ?) OR NOT (manager_id <=> ?))
-    `, [departmentName, ManagerId, departmentId, departmentName, ManagerId]);
+    `, [departmentName, ManagerId, departmentId]);
     await redisClient.del('depts:all');
     await redisClient.del('managers:all'); // Vì manager thay đổi nên phải xóa cả cache manager
     return results;
