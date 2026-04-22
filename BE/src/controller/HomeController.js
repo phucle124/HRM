@@ -177,7 +177,7 @@ const createUser = async(req,res)=>{
 }
 
 const editUser = async(req,res)=>{
-    const id = req.body.id;
+    const id = req.params.id;
     
     const name = req.body.name;
     const email = req.body.email;
